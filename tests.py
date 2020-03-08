@@ -4,8 +4,8 @@ from models.centernet import CenterNet
 from models.backbone import Backbone
 from models.ops import ShapeSpec
 from models.backbone import ResnetBackbone
-from models.head import CenternetDeconv
-from models.head import CenternetHead
+from models.head.centernet_deconv import CenternetDeconv
+from models.head.centernet_head import CenternetHead
 from models.centernet import CenterNet
 
 

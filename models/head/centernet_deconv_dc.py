@@ -4,33 +4,28 @@ import math
 
 import torch.nn as nn
 
-"""
-normal deconv without dcn
-
-"""
+from ..ops import DeformConvWithOff, ModulatedDeformConvWithOff
 
 
 class DeconvLayer(nn.Module):
+
     def __init__(
         self, in_planes,
         out_planes, deconv_kernel,
         deconv_stride=2, deconv_pad=1,
-        deconv_out_pad=0
+        deconv_out_pad=0, modulate_deform=True,
     ):
         super(DeconvLayer, self).__init__()
-        # if modulate_deform:
-        #     self.dcn = ModulatedDeformConvWithOff(
-        #         in_planes, out_planes,
-        #         kernel_size=3, deformable_groups=1,
-        #     )
-        # else:
-        #     self.dcn = DeformConvWithOff(
-        #         in_planes, out_planes,
-        #         kernel_size=3, deformable_groups=1,
-        #     )
-        self.conv = nn.Conv2d(
-            in_planes, out_planes, kernel_size=3
-        )
+        if modulate_deform:
+            self.dcn = ModulatedDeformConvWithOff(
+                in_planes, out_planes,
+                kernel_size=3, deformable_groups=1,
+            )
+        else:
+            self.dcn = DeformConvWithOff(
+                in_planes, out_planes,
+                kernel_size=3, deformable_groups=1,
+            )
 
         self.dcn_bn = nn.BatchNorm2d(out_planes)
         self.up_sample = nn.ConvTranspose2d(
@@ -46,7 +41,7 @@ class DeconvLayer(nn.Module):
         self.relu = nn.ReLU()
 
     def forward(self, x):
-        x = self.conv(x)
+        x = self.dcn(x)
         x = self.dcn_bn(x)
         x = self.relu(x)
         x = self.up_sample(x)
@@ -76,17 +71,21 @@ class CenternetDeconv(nn.Module):
         # modify into config
         channels = cfg.MODEL.CENTERNET.DECONV_CHANNEL
         deconv_kernel = cfg.MODEL.CENTERNET.DECONV_KERNEL
+        modulate_deform = cfg.MODEL.CENTERNET.MODULATE_DEFORM
         self.deconv1 = DeconvLayer(
             channels[0], channels[1],
             deconv_kernel=deconv_kernel[0],
+            modulate_deform=modulate_deform,
         )
         self.deconv2 = DeconvLayer(
             channels[1], channels[2],
             deconv_kernel=deconv_kernel[1],
+            modulate_deform=modulate_deform,
         )
         self.deconv3 = DeconvLayer(
             channels[2], channels[3],
             deconv_kernel=deconv_kernel[2],
+            modulate_deform=modulate_deform,
         )
 
     def forward(self, x):
