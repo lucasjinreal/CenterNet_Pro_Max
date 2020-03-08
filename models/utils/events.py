@@ -261,8 +261,7 @@ class CommonMetricPrinter(EventWriter):
             ]
         )
         self.logger.info(
-            """eta: {eta}  iter: {iter}  {losses}  {time}  {data_time}  lr: {lr}  {memory}
-            """.format(
+            """eta: {eta}  iter: {iter}  {losses}  {time}  {data_time}  lr: {lr}  {memory}""".format(
                 eta=eta_string,
                 iter=iteration + 1,
                 losses=losses,
