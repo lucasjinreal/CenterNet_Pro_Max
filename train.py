@@ -50,7 +50,7 @@ def train(args):
     config.merge_from_list(args.opts)
     cfg = config
     model = build_model(cfg)
-    if os.path.exists(cfg.OUTPUT_DIR):
+    if not os.path.exists(cfg.OUTPUT_DIR):
         os.makedirs(cfg.OUTPUT_DIR, exist_ok=True)
     logger.info('output will be saved into: {}'.format(cfg.OUTPUT_DIR))
     trainer = Trainer(cfg, model)
