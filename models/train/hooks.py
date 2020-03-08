@@ -17,7 +17,7 @@ from ..utils.checkpoint import \
 from ..utils.events import EventStorage, EventWriter
 from alfred.utils.file_io import PathManager
 from alfred.utils.timer import Timer
-
+from alfred.utils.log import logger
 from .train_loop import HookBase
 
 __all__ = [
@@ -99,7 +99,6 @@ class IterationTimer(HookBase):
         self._total_timer.pause()
 
     def after_train(self):
-        logger = logging.getLogger(__name__)
         total_time = time.perf_counter() - self._start_time
         total_time_minus_hooks = self._total_timer.seconds()
         hook_time = total_time - total_time_minus_hooks
@@ -369,7 +368,7 @@ class PreciseBN(HookBase):
             num_iter (int): number of iterations used to compute the precise
                 statistics.
         """
-        self._logger = logging.getLogger(__name__)
+        self._logger = logger
         if len(get_bn_modules(model)) == 0:
             self._logger.info(
                 "PreciseBN is disabled because model does not contain BN ops in training mode."

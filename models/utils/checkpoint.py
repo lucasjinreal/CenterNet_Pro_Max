@@ -15,6 +15,7 @@ from torch.nn.parallel import DataParallel, DistributedDataParallel
 
 from alfred.utils.file_io import PathManager
 from termcolor import colored
+from alfred.utils.log import logger
 
 
 class Checkpointer(object):
@@ -46,7 +47,7 @@ class Checkpointer(object):
             model = model.module
         self.model = model
         self.checkpointables = copy.copy(checkpointables)
-        self.logger = logging.getLogger(__name__)
+        self.logger = logger
         self.save_dir = save_dir
         self.save_to_disk = save_to_disk
 
