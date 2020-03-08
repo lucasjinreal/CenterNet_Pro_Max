@@ -75,7 +75,7 @@ class ROIAlign(nn.Module):
             prior to calling roi_align. This produces the correct neighbors;
 
             The difference does not make a difference to the model's performance if
-            ROIAlign is used together with conv layers.
+            ROIAlign is used together with conv ops.
         """
         super(ROIAlign, self).__init__()
         self.output_size = output_size

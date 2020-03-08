@@ -2,7 +2,7 @@
 # -*- coding:utf-8 -*-
 import torch.nn.functional as F
 
-from dl_lib.nn_utils.feature_utils import gather_feature
+from ..utils.nn_utils import gather_feature
 
 
 def reg_l1_loss(output, mask, index, target):

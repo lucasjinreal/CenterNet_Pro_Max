@@ -15,7 +15,7 @@ assert torch_ver >= [1, 3], "Requires PyTorch >= 1.3"
 
 def get_extensions():
     this_dir = os.path.dirname(os.path.abspath(__file__))
-    extensions_dir = os.path.join(this_dir, "dl_lib", "layers")
+    extensions_dir = os.path.join(this_dir, "dl_lib", "ops")
 
     main_source = os.path.join(extensions_dir, "vision.cpp")
     sources = glob.glob(os.path.join(extensions_dir, "**", "*.cpp"))
@@ -61,11 +61,11 @@ def get_extensions():
 
 
 cur_dir = os.getcwd()
-with open("tools/dl_train", "w") as dl_lib_train:
+with open("../tools/dl_train", "w") as dl_lib_train:
     head = f"#!/bin/bash\n\nexport OMP_NUM_THREADS=1\n"
     dl_lib_train.write(
         head + f"python3 {os.path.join(cur_dir, 'tools', 'train_net.py')} $@")
-with open("tools/dl_test", "w") as dl_lib_test:
+with open("../tools/dl_test", "w") as dl_lib_test:
     dl_lib_test.write(
         head + f"python3 {os.path.join(cur_dir, 'tools', 'test_net.py')} $@")
 

@@ -30,14 +30,14 @@ def update_bn_stats(model, data_loader, num_iters: int = 200):
             Note that:
 
             1. This function will not alter the training mode of the given model.
-               Users are responsible for setting the layers that needs
+               Users are responsible for setting the ops that needs
                precise-BN to training mode, prior to calling this function.
 
-            2. Be careful if your models contain other stateful layers in
-               addition to BN, i.e. layers whose state can change in forward
+            2. Be careful if your models contain other stateful ops in
+               addition to BN, i.e. ops whose state can change in forward
                iterations.  This function will alter their state. If you wish
                them unchanged, you need to either pass in a submodule without
-               those layers, or backup the states.
+               those ops, or backup the states.
         data_loader (iterator): an iterator. Produce data as inputs to the model.
         num_iters (int): number of iterations to compute the stats.
     """
@@ -90,7 +90,7 @@ def get_bn_modules(model):
     Returns:
         list[nn.Module]: all BN modules in the model.
     """
-    # Finds all the bn layers.
+    # Finds all the bn ops.
     bn_layers = [
         m
         for m in model.modules()

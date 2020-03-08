@@ -362,9 +362,9 @@ class PreciseBN(HookBase):
         Args:
             period (int): the period this hook is run, or 0 to not run during training.
                 The hook will always run in the end of training.
-            model (nn.Module): a module whose all BN layers in training mode will be
+            model (nn.Module): a module whose all BN ops in training mode will be
                 updated by precise BN.
-                Note that user is responsible for ensuring the BN layers to be
+                Note that user is responsible for ensuring the BN ops to be
                 updated are in training mode when this hook is triggered.
             data_loader (iterable): it will produce data to be run by `model(data)`.
             num_iter (int): number of iterations used to compute the precise
@@ -373,7 +373,7 @@ class PreciseBN(HookBase):
         self._logger = logging.getLogger(__name__)
         if len(get_bn_modules(model)) == 0:
             self._logger.info(
-                "PreciseBN is disabled because model does not contain BN layers in training mode."
+                "PreciseBN is disabled because model does not contain BN ops in training mode."
             )
             self._disabled = True
             return

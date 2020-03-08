@@ -5,13 +5,15 @@ import torch
 import torch.nn as nn
 
 # disable fancy structures
-from dl_lib.layers import ShapeSpec
+from .ops.shape_spec import ShapeSpec
 
 # does boxes and ImageList really needed?
-from dl_lib.structures import Boxes, ImageList, Instances
-
+from .structures import Boxes, ImageList, Instances
 from .generator import CenterNetDecoder, CenterNetGT
 from .loss import modified_focal_loss, reg_l1_loss
+
+from alfred.utils.log import logger as logging
+
 
 
 class CenterNet(nn.Module):
@@ -35,6 +37,7 @@ class CenterNet(nn.Module):
         )
         self.upsample = cfg.build_upsample_layers(cfg)
         self.head = cfg.build_head(cfg)
+        logging.info('head built: {}'.format(self.head))
         # self.cls_head = cfg.build_cls_head(cfg)
         # self.wh_head = cfg.build_width_height_head(cfg)
         # self.reg_head = cfg.build_center_reg_head(cfg)

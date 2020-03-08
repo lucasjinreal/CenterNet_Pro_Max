@@ -4,7 +4,7 @@ import math
 
 import torch.nn as nn
 
-from dl_lib.layers import DeformConvWithOff, ModulatedDeformConvWithOff
+from ..ops import DeformConvWithOff, ModulatedDeformConvWithOff
 
 
 class DeconvLayer(nn.Module):

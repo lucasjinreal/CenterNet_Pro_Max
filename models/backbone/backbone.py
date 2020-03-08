@@ -3,7 +3,7 @@ from abc import ABCMeta, abstractmethod
 
 import torch.nn as nn
 
-from dl_lib.layers import ShapeSpec
+from ..ops import ShapeSpec
 
 __all__ = ["Backbone"]
 

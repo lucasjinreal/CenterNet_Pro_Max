@@ -2,13 +2,12 @@ import os
 import pprint
 import re
 from ast import literal_eval
-
 from colorama import Back, Fore
 from easydict import EasyDict as edict
 
-from dl_lib.utils.config_helper import (_assert_with_logging,
-                                        _check_and_coerce_cfg_value_type,
-                                        diff_dict, find_key, highlight, update)
+from .config_helper import (_assert_with_logging,
+                            _check_and_coerce_cfg_value_type,
+                            diff_dict, find_key, highlight, update)
 
 _config_dict = dict(
     MODEL=dict(
@@ -25,7 +24,7 @@ _config_dict = dict(
             TRAIN_PIPELINES=[],
             TEST_PIPELINES=[],
         ),
-        CROP=dict(ENABLED=False, TYPE="relative_range", SIZE=[0.9, 0.9],),
+        CROP=dict(ENABLED=False, TYPE="relative_range", SIZE=[0.9, 0.9], ),
         FORMAT="BGR",
     ),
     DATASETS=dict(
