@@ -11,7 +11,7 @@ from typing import List, Tuple
 
 import numpy as np
 from alfred.utils.file_io import PathManager
-
+from alfred.utils.log import logger
 
 
 _CURRENT_STORAGE_STACK = []
@@ -221,7 +221,7 @@ class CommonMetricPrinter(EventWriter):
             max_iter (int): the maximum number of iterations to train.
                 Used to compute ETA.
         """
-        self.logger = logging.getLogger(__name__)
+        self.logger = logger
         self._max_iter = max_iter
 
     def write(self):
@@ -261,17 +261,17 @@ class CommonMetricPrinter(EventWriter):
             ]
         )
         self.logger.info(
-            """eta: {eta}  iter: {iter}  {losses}  {time}  {data_time}  lr: {lr}  {memory}\
+            """eta: {eta}  iter: {iter}  {losses}  {time}  {data_time}  lr: {lr}  {memory}
             """.format(
                 eta=eta_string,
                 iter=iteration + 1,
                 losses=losses,
-                time="time: {:.4f}".format(time) if time is not None else "",
-                data_time="data_time: {:.4f}".format(data_time)
+                time="tim: {:.4f}".format(time) if time is not None else "",
+                data_time="data_tim: {:.4f}".format(data_time)
                 if data_time is not None
                 else "",
                 lr=lr,
-                memory="max_mem: {:.0f}M".format(max_mem_mb)
+                memory="mem: {:.0f}M".format(max_mem_mb)
                 if max_mem_mb is not None
                 else "",
             )
