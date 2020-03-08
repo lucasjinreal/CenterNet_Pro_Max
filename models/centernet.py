@@ -14,10 +14,22 @@ from .networks.loss import modified_focal_loss, reg_l1_loss
 from alfred.utils.log import logger as logging
 
 from .networks.head.centernet_head import CenternetHead
-from .networks.head.centernet_deconv import CenternetDeconv
+# try:
+#     from .networks.head.centernet_deconv_dc import CenternetDeconv
+#     logging.warning('using DCN based deconv layer for centernet.')
+# except ImportError:
+#     logging.warning('Try import DCN based deconv faild, using normal one.')
+#     from .networks.head.centernet_deconv import CenternetDeconv
+# from .networks.head.centernet_deconv import CenternetDeconv
+from .networks.head.centernet_deconv_dc import CenternetDeconv
+
 from .backbone.backbone import Backbone
 from .backbone.resnet_backbone import ResnetBackbone
 
+
+def print_dict_shape(d, mark):
+    for k, v in d.items():
+        logging.info('{} dict shape: {}: {}'.format(mark, k, v.shape))
 
 class CenterNet(nn.Module):
     """
@@ -40,7 +52,6 @@ class CenterNet(nn.Module):
         )
         self.upsample = cfg.build_upsample_layers(cfg)
         self.head = cfg.build_head(cfg)
-        logging.info('head built: {}'.format(self.head))
         # self.cls_head = cfg.build_cls_head(cfg)
         # self.wh_head = cfg.build_width_height_head(cfg)
         # self.reg_head = cfg.build_center_reg_head(cfg)
@@ -79,6 +90,7 @@ class CenterNet(nn.Module):
         features = self.backbone(images.tensor)
         up_fmap = self.upsample(features)
         pred_dict = self.head(up_fmap)
+        # print_dict_shape(pred_dict, 'pred')
 
         gt_dict = self.get_ground_truth(batched_inputs)
 

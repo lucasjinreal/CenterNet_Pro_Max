@@ -7,6 +7,7 @@ import numpy as np
 import torch
 
 import alfred.dl.torch.distribute.utils as comm
+from alfred.utils.log import logger
 from ..utils.events import EventStorage
 
 __all__ = ["HookBase", "TrainerBase", "SimpleTrainer"]
@@ -117,7 +118,6 @@ class TrainerBase:
         Args:
             start_iter, max_iter (int): See docs above
         """
-        logger = logging.getLogger(__name__)
         logger.info("Starting training from iteration {}".format(start_iter))
 
         self.iter = self.start_iter = start_iter

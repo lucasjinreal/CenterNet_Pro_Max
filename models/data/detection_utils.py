@@ -37,7 +37,6 @@ def read_image(file_name, format=None):
     """
     with open(file_name, "rb") as f:
         image = Image.open(f)
-
         image = ImageOps.exif_transpose(image)
         # capture and ignore this bug: https://github.com/python-pillow/Pillow/issues/3973
         try:

@@ -1,9 +1,7 @@
 # Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved
 import itertools
 from typing import Any, Dict, List, Tuple, Union
-
 import torch
-
 from ..ops import cat
 
 

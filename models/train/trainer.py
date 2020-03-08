@@ -16,6 +16,8 @@ from ..data.build import build_detection_test_loader, build_detection_train_load
 from ..evaluation.evaluator import DatasetEvaluator, inference_on_dataset
 from . import hooks
 from ..utils.nn_utils import get_bn_modules, update_bn_stats
+from ..utils.events import (CommonMetricPrinter, JSONWriter,
+                                 TensorboardXWriter)
 
 
 
@@ -155,7 +157,12 @@ class DefaultTrainer(SimpleTrainer):
         return ret
 
     def build_writers(self):
-        logging.info('passing writers for simplicity.')
+        return [
+            # It may not always print what you want to see, since it prints "common" metrics only.
+            CommonMetricPrinter(self.max_iter),
+            JSONWriter(os.path.join(self.cfg.OUTPUT_DIR, "metrics.json")),
+            TensorboardXWriter(self.cfg.OUTPUT_DIR),
+        ]
 
     def train(self):
         """

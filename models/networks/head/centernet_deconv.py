@@ -3,6 +3,7 @@
 import math
 
 import torch.nn as nn
+from alfred.utils.log import logger
 
 """
 normal deconv without dcn
@@ -46,8 +47,12 @@ class DeconvLayer(nn.Module):
         self.relu = nn.ReLU()
 
     def forward(self, x):
+        logger.info('in x shpe: {}'.format(x.shape))
         x = self.conv(x)
+        logger.info('dcn out shpe: {}'.format(x.shape))
+        # should be 256, 16, 16 | 128, 32, 32| 64, 64, 64
         x = self.dcn_bn(x)
+        logger.info('dcn_bn out shpe: {}'.format(x.shape))
         x = self.relu(x)
         x = self.up_sample(x)
         x = self.up_bn(x)

@@ -51,7 +51,7 @@ _config_dict = dict(
         OUTPUT_SIZE=(128, 128),
     ),
     DATALOADER=dict(
-        NUM_WORKERS=4,
+        NUM_WORKERS=0,
     ),
     DATASETS=dict(
         TRAIN=("coco_2017_train",),
@@ -69,7 +69,7 @@ _config_dict = dict(
             MAX_ITER=126000,
             WARMUP_ITERS=1000,
         ),
-        IMS_PER_BATCH=128,
+        IMS_PER_BATCH=4,
     ),
     OUTPUT_DIR='./checkpoints/',
     GLOBAL=dict(DUMP_TEST=False),

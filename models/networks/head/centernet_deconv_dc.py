@@ -4,7 +4,11 @@ import math
 
 import torch.nn as nn
 
-from models.ops import DeformConvWithOff, ModulatedDeformConvWithOff
+from models.ops.deformable.deform_conv import DeformConv, ModulatedDeformConv
+from models.ops.deformable.deform_conv_with_off import (DeformConvWithOff,
+                                              ModulatedDeformConvWithOff)
+
+from alfred.utils.log import logger
 
 
 class DeconvLayer(nn.Module):
@@ -41,8 +45,11 @@ class DeconvLayer(nn.Module):
         self.relu = nn.ReLU()
 
     def forward(self, x):
+        logger.info('in x shpe: {}'.format(x.shape))
         x = self.dcn(x)
+        logger.info('dcn out shpe: {}'.format(x.shape))
         x = self.dcn_bn(x)
+        logger.info('dcn_bn out shpe: {}'.format(x.shape))
         x = self.relu(x)
         x = self.up_sample(x)
         x = self.up_bn(x)

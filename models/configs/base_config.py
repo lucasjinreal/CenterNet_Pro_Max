@@ -32,7 +32,7 @@ _config_dict = dict(
         TEST=(),
     ),
     DATALOADER=dict(
-        NUM_WORKERS=2,
+        NUM_WORKERS=0,
         ASPECT_RATIO_GROUPING=True,
         SAMPLER_TRAIN="TrainingSampler",
         REPEAT_THRESHOLD=0.0,
