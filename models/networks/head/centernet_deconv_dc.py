@@ -45,11 +45,11 @@ class DeconvLayer(nn.Module):
         self.relu = nn.ReLU()
 
     def forward(self, x):
-        logger.info('in x shpe: {}'.format(x.shape))
+        # logger.info('in x shpe: {}'.format(x.shape))
         x = self.dcn(x)
-        logger.info('dcn out shpe: {}'.format(x.shape))
+        # logger.info('dcn out shpe: {}'.format(x.shape))
         x = self.dcn_bn(x)
-        logger.info('dcn_bn out shpe: {}'.format(x.shape))
+        # logger.info('dcn_bn out shpe: {}'.format(x.shape))
         x = self.relu(x)
         x = self.up_sample(x)
         x = self.up_bn(x)
