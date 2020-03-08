@@ -43,3 +43,4 @@ tools/cvpack2_train
 **/log
 tools/dl_test
 tools/dl_train
+checkpoints/
