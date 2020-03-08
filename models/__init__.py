@@ -3,5 +3,4 @@
 
 from .backbone import Backbone, ResnetBackbone
 from .centernet import CenterNet
-from .head import CenternetDeconv, CenternetHead
-from .loss.reg_l1_loss import reg_l1_loss
+from models.networks.loss.reg_l1_loss import reg_l1_loss

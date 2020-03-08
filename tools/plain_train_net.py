@@ -23,7 +23,7 @@ import torch
 from torch.nn.parallel import DistributedDataParallel
 
 import dl_lib.utils.comm as comm
-from configs.centernet_config import config
+from configs.ct_coco_r50_config import config
 from dl_lib.checkpoint import DetectionCheckpointer, PeriodicCheckpointer
 from dl_lib.config import get_cfg
 from dl_lib.data import (MetadataCatalog, build_detection_test_loader,

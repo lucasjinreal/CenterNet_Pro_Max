@@ -71,10 +71,7 @@ _config_dict = dict(
         ),
         IMS_PER_BATCH=128,
     ),
-    OUTPUT_DIR=osp.join(
-        './model_logs/playground',
-        osp.split(osp.realpath(__file__))[0].split("playground/")[-1]
-    ),
+    OUTPUT_DIR='./checkpoints/',
     GLOBAL=dict(DUMP_TEST=False),
 )
 

@@ -23,7 +23,7 @@ sys.path.insert(0, '.')  # noqa: E402
 from colorama import Fore, Style
 
 import dl_lib.utils.comm as comm
-from configs.centernet_config import config
+from configs.ct_coco_r50_config import config
 from dl_lib.checkpoint import DetectionCheckpointer
 from dl_lib.data import MetadataCatalog
 from dl_lib.engine import (DefaultTrainer, default_argument_parser,

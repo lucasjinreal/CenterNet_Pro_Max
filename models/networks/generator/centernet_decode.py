@@ -7,8 +7,8 @@ import numpy as np
 import torch
 import torch.nn.functional as F
 
-from ..data.transforms.transform_gen import CenterAffine
-from ..utils.nn_utils import gather_feature
+from models.data.transforms.transform_gen import CenterAffine
+from models.utils.nn_utils import gather_feature
 
 
 class CenterNetDecoder(object):

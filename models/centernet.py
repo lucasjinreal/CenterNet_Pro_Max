@@ -9,11 +9,14 @@ from .ops.shape_spec import ShapeSpec
 
 # does boxes and ImageList really needed?
 from .structures import Boxes, ImageList, Instances
-from .generator import CenterNetDecoder, CenterNetGT
-from .loss import modified_focal_loss, reg_l1_loss
-
+from .networks.generator import CenterNetDecoder, CenterNetGT
+from .networks.loss import modified_focal_loss, reg_l1_loss
 from alfred.utils.log import logger as logging
 
+from .networks.head.centernet_head import CenternetHead
+from .networks.head.centernet_deconv import CenternetDeconv
+from .backbone.backbone import Backbone
+from .backbone.resnet_backbone import ResnetBackbone
 
 
 class CenterNet(nn.Module):
@@ -193,3 +196,26 @@ class CenterNet(nn.Module):
         images = [self.normalizer(img / 255) for img in images]
         images = ImageList.from_tensors(images, self.backbone.size_divisibility)
         return images
+
+
+def build_model(cfg):
+    def build_backbone(cfg, input_shape=None):
+        if input_shape is None:
+            input_shape = ShapeSpec(channels=len(cfg.MODEL.PIXEL_MEAN))
+        backbone = ResnetBackbone(cfg, input_shape)
+        assert isinstance(backbone, Backbone)
+        return backbone
+
+    def build_head(cfg, ):
+        head = CenternetHead(cfg)
+        return head
+
+    def build_upsample_layers(cfg, ):
+        upsample = CenternetDeconv(cfg)
+        return upsample
+
+    cfg.build_backbone = build_backbone
+    cfg.build_upsample_layers = build_upsample_layers
+    cfg.build_head = build_head
+    model = CenterNet(cfg)
+    return model
