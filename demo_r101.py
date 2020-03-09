@@ -1,5 +1,5 @@
 
-from configs.ct_coco_r50_config import config
+from configs.ct_coco_r101_config import config
 from models.data import MetadataCatalog
 from models.centernet import build_model
 from models.train.checkpoint import DetectionCheckpointer
