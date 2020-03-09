@@ -49,8 +49,6 @@ _config_dict = dict(
         ),
         FORMAT="RGB",
         OUTPUT_SIZE=(128, 128),
-        MIN_SIZE_TEST=512,
-        MAX_SIZE_TEST=512,
     ),
     DATALOADER=dict(
         NUM_WORKERS=0,
@@ -61,10 +59,9 @@ _config_dict = dict(
     ),
     SOLVER=dict(
         OPTIMIZER=dict(
-            NAME="Adam",
-            BASE_LR=0.01,
+            NAME="SGD",
+            BASE_LR=0.02,
             WEIGHT_DECAY=1e-4,
-            AMSGRAD=True,
         ),
         LR_SCHEDULER=dict(
             GAMMA=0.1,
@@ -72,7 +69,7 @@ _config_dict = dict(
             MAX_ITER=126000,
             WARMUP_ITERS=1000,
         ),
-        IMS_PER_BATCH=8,
+        IMS_PER_BATCH=4,
     ),
     OUTPUT_DIR='./checkpoints/',
     GLOBAL=dict(DUMP_TEST=False),
