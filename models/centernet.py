@@ -14,15 +14,6 @@ from .networks.loss import modified_focal_loss, reg_l1_loss
 from alfred.utils.log import logger as logging
 
 from .networks.head.centernet_head import CenternetHead
-# try:
-#     from .networks.head.centernet_deconv_dc import CenternetDeconv
-#     logging.warning('using DCN based deconv layer for centernet.')
-# except ImportError:
-#     logging.warning('Try import DCN based deconv faild, using normal one.')
-#     from .networks.head.centernet_deconv import CenternetDeconv
-# from .networks.head.centernet_deconv import CenternetDeconv
-from .networks.head.centernet_deconv_dc import CenternetDeconv
-
 from .backbone.backbone import Backbone
 from .backbone.resnet_backbone import ResnetBackbone
 
@@ -89,9 +80,12 @@ class CenterNet(nn.Module):
             return self.inference(images)
 
         features = self.backbone(images.tensor)
+        # print('backbone out feature size: {}'.format(features.shape))
         up_fmap = self.upsample(features)
+        # print('after deconv shape: {}'.format(up_fmap.shape))
         pred_dict = self.head(up_fmap)
         # print_dict_shape(pred_dict, 'pred')
+        # print(self.head)
 
         gt_dict = self.get_ground_truth(batched_inputs)
 
@@ -223,7 +217,13 @@ def build_model(cfg):
         return head
 
     def build_upsample_layers(cfg, ):
-        upsample = CenternetDeconv(cfg)
+        if cfg.MODEL.CENTERNET.USE_DCN:
+            from .networks.head.centernet_deconv_dc import CenternetDeconv
+            logging.info('build model with DCN support.')
+            upsample = CenternetDeconv(cfg)
+        else:
+            from .networks.head.centernet_deconv import CenternetDeconv
+            upsample = CenternetDeconv(cfg)
         return upsample
 
     cfg.build_backbone = build_backbone

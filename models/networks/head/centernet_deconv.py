@@ -11,91 +11,86 @@ normal deconv without dcn
 """
 
 
-class DeconvLayer(nn.Module):
-    def __init__(
-        self, in_planes,
-        out_planes, deconv_kernel,
-        deconv_stride=2, deconv_pad=1,
-        deconv_out_pad=0
-    ):
-        super(DeconvLayer, self).__init__()
-        # if modulate_deform:
-        #     self.dcn = ModulatedDeformConvWithOff(
-        #         in_planes, out_planes,
-        #         kernel_size=3, deformable_groups=1,
-        #     )
-        # else:
-        #     self.dcn = DeformConvWithOff(
-        #         in_planes, out_planes,
-        #         kernel_size=3, deformable_groups=1,
-        #     )
-        self.conv = nn.Conv2d(
-            in_planes, out_planes, kernel_size=3
-        )
-
-        self.dcn_bn = nn.BatchNorm2d(out_planes)
-        self.up_sample = nn.ConvTranspose2d(
-            in_channels=out_planes,
-            out_channels=out_planes,
-            kernel_size=deconv_kernel,
-            stride=deconv_stride, padding=deconv_pad,
-            output_padding=deconv_out_pad,
-            bias=False,
-        )
-        self._deconv_init()
-        self.up_bn = nn.BatchNorm2d(out_planes)
-        self.relu = nn.ReLU()
-
-    def forward(self, x):
-        logger.info('in x shpe: {}'.format(x.shape))
-        x = self.conv(x)
-        logger.info('dcn out shpe: {}'.format(x.shape))
-        # should be 256, 16, 16 | 128, 32, 32| 64, 64, 64
-        x = self.dcn_bn(x)
-        logger.info('dcn_bn out shpe: {}'.format(x.shape))
-        x = self.relu(x)
-        x = self.up_sample(x)
-        x = self.up_bn(x)
-        x = self.relu(x)
-        return x
-
-    def _deconv_init(self):
-        w = self.up_sample.weight.data
-        f = math.ceil(w.size(2) / 2)
-        c = (2 * f - 1 - f % 2) / (2. * f)
-        for i in range(w.size(2)):
-            for j in range(w.size(3)):
-                w[0, 0, i, j] = \
-                    (1 - math.fabs(i / f - c)) * (1 - math.fabs(j / f - c))
-        for c in range(1, w.size(0)):
-            w[c, 0, :, :] = w[0, 0, :, :]
-
-
 class CenternetDeconv(nn.Module):
-    """
-    The head used in CenterNet for object classification and box regression.
-    It has three subnet, with a common structure but separate parameters.
-    """
     def __init__(self, cfg):
         super(CenternetDeconv, self).__init__()
-        # modify into config
-        channels = cfg.MODEL.CENTERNET.DECONV_CHANNEL
-        deconv_kernel = cfg.MODEL.CENTERNET.DECONV_KERNEL
-        self.deconv1 = DeconvLayer(
-            channels[0], channels[1],
-            deconv_kernel=deconv_kernel[0],
-        )
-        self.deconv2 = DeconvLayer(
-            channels[1], channels[2],
-            deconv_kernel=deconv_kernel[1],
-        )
-        self.deconv3 = DeconvLayer(
-            channels[2], channels[3],
-            deconv_kernel=deconv_kernel[2],
+        self.bn_momentum = cfg.MODEL.CENTERNET.BN_MOMENTUM
+        # output of backbone should be [1, 2048, 16, 16]
+        self.inplanes = 2048
+        self.deconv_with_bias = False
+        self.deconv_layers = self._make_deconv_layer(
+            num_layers=3,
+            num_filters=[256, 256, 256],
+            num_kernels=[4, 4, 4],
         )
 
+    def _get_deconv_cfg(self, deconv_kernel, index):
+        if deconv_kernel == 4:
+            padding = 1
+            output_padding = 0
+        elif deconv_kernel == 3:
+            padding = 1
+            output_padding = 1
+        elif deconv_kernel == 2:
+            padding = 0
+            output_padding = 0
+        return deconv_kernel, padding, output_padding
+        
+    def _make_deconv_layer(self, num_layers, num_filters, num_kernels):
+        assert num_layers == len(num_filters), \
+            'ERROR: num_deconv_layers is different len(num_deconv_filters)'
+        assert num_layers == len(num_kernels), \
+            'ERROR: num_deconv_layers is different len(num_deconv_filters)'
+        layers = []
+        for i in range(num_layers):
+            kernel, padding, output_padding = \
+                self._get_deconv_cfg(num_kernels[i], i)
+            planes = num_filters[i]
+            layers.append(
+                nn.ConvTranspose2d(
+                    in_channels=self.inplanes,
+                    out_channels=planes,
+                    kernel_size=kernel,
+                    stride=2,
+                    padding=padding,
+                    output_padding=output_padding,
+                    bias=self.deconv_with_bias))
+            layers.append(nn.BatchNorm2d(planes, momentum=self.bn_momentum))
+            layers.append(nn.ReLU(inplace=True))
+            self.inplanes = planes
+        return nn.Sequential(*layers)
+
     def forward(self, x):
-        x = self.deconv1(x)
-        x = self.deconv2(x)
-        x = self.deconv3(x)
+        x = self.deconv_layers(x)
         return x
+
+
+
+# class CenternetDeconv2(nn.Module):
+#     """
+#     The head used in CenterNet for object classification and box regression.
+#     It has three subnet, with a common structure but separate parameters.
+#     """
+#     def __init__(self, cfg):
+#         super(CenternetDeconv, self).__init__()
+#         # modify into config
+#         channels = cfg.MODEL.CENTERNET.DECONV_CHANNEL
+#         deconv_kernel = cfg.MODEL.CENTERNET.DECONV_KERNEL
+#         self.deconv1 = DeconvLayer(
+#             channels[0], channels[1],
+#             deconv_kernel=deconv_kernel[0],
+#         )
+#         self.deconv2 = DeconvLayer(
+#             channels[1], channels[2],
+#             deconv_kernel=deconv_kernel[1],
+#         )
+#         self.deconv3 = DeconvLayer(
+#             channels[2], channels[3],
+#             deconv_kernel=deconv_kernel[2],
+#         )
+
+#     def forward(self, x):
+#         x = self.deconv1(x)
+#         x = self.deconv2(x)
+#         x = self.deconv3(x)
+#         return x

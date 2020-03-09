@@ -16,6 +16,8 @@ _config_dict = dict(
         PIXEL_MEAN=[0.485, 0.456, 0.406],
         PIXEL_STD=[0.229, 0.224, 0.225],
         CENTERNET=dict(
+            USE_DCN=False,
+            HEAD_CONV=64,
             DECONV_CHANNEL=[2048, 256, 128, 64],
             DECONV_KERNEL=[4, 4, 4],
             NUM_CLASSES=80,
@@ -24,6 +26,7 @@ _config_dict = dict(
             DOWN_SCALE=4,
             MIN_OVERLAP=0.7,
             TENSOR_DIM=128,
+            BN_MOMENTUM = 0.1
         ),
         LOSS=dict(
             CLS_WEIGHT=1,
@@ -62,8 +65,8 @@ _config_dict = dict(
     SOLVER=dict(
         OPTIMIZER=dict(
             NAME="Adam",
-            BASE_LR=0.01,
-            WEIGHT_DECAY=1e-4,
+            BASE_LR=0.0125,
+            WEIGHT_DECAY=1e-3,
             AMSGRAD=True,
         ),
         LR_SCHEDULER=dict(

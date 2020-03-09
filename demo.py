@@ -55,7 +55,7 @@ class DefaultPredictor:
 
 
 if __name__ == '__main__':
-    config.MODEL.WEIGHTS = 'checkpoints/sgd/model_0009999.pth'
+    config.MODEL.WEIGHTS = 'checkpoints/last_checkpoint'
     predictor = DefaultPredictor(config)
 
     data_f = sys.argv[1]

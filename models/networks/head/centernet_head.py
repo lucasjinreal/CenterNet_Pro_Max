@@ -26,16 +26,33 @@ class CenternetHead(nn.Module):
     The head used in CenterNet for object classification and box regression.
     It has three subnet, with a common structure but separate parameters.
     """
+
     def __init__(self, cfg):
         super(CenternetHead, self).__init__()
-        self.cls_head = SingleHead(
-            64,
-            cfg.MODEL.CENTERNET.NUM_CLASSES,
-            bias_fill=True,
-            bias_value=cfg.MODEL.CENTERNET.BIAS_VALUE,
-        )
-        self.wh_head = SingleHead(64, 2)
-        self.reg_head = SingleHead(64, 2)
+        self.cfg = cfg
+        self._init_heads()
+
+    def _init_heads(self):
+        if self.cfg.MODEL.CENTERNET.USE_DCN:
+            self.cls_head = SingleHead(
+                64,
+                self.cfg.MODEL.CENTERNET.NUM_CLASSES,
+                bias_fill=True,
+                bias_value=self.cfg.MODEL.CENTERNET.BIAS_VALUE,
+            )
+            self.wh_head = SingleHead(64, 2)
+            self.reg_head = SingleHead(64, 2)
+        else:
+            # build heads for resnets
+            num_output = self.cfg.MODEL.CENTERNET.NUM_CLASSES
+            self.cls_head = nn.Sequential(
+                nn.Conv2d(256, self.cfg.MODEL.CENTERNET.HEAD_CONV,
+                          kernel_size=3, padding=1, bias=True),
+                nn.ReLU(inplace=True),
+                nn.Conv2d(self.cfg.MODEL.CENTERNET.HEAD_CONV, num_output,
+                          kernel_size=1, stride=1, padding=0))
+            self.wh_head = SingleHead(256, 2)
+            self.reg_head = SingleHead(256, 2)
 
     def forward(self, x):
         cls = self.cls_head(x)
