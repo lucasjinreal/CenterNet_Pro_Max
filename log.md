@@ -1,3 +1,5 @@
+- 2020.03.09: Changes dcn to mmdetection version, changed setup.py installation steps, but more doesn't converge that is a big problem.
+
 - dcn head and deconv head not same:
 
   dcn:
@@ -15,7 +17,7 @@
 
   ```
 
-  ​
+  
 
   deconv:
 
@@ -31,4 +33,4 @@
   INFO 03.08 20:14:37 centernet_deconv.py:54: dcn_bn out shpe: torch.Size([4, 64, 50, 50])
   ```
 
-  ​
+  

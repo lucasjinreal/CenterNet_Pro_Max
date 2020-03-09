@@ -4,8 +4,8 @@ import math
 
 import torch.nn as nn
 
-from models.ops.deformable.deform_conv import DeformConv, ModulatedDeformConv
-from models.ops.deformable.deform_conv_with_off import (DeformConvWithOff,
+# from models.ops.deformable.deform_conv import DeformConv, ModulatedDeformConv
+from models.ops.dcn.deform_conv_with_off import (DeformConvWithOff,
                                               ModulatedDeformConvWithOff)
 
 from alfred.utils.log import logger

@@ -13,17 +13,41 @@ torch_ver = [int(x) for x in torch.__version__.split(".")[:2]]
 assert torch_ver >= [1, 3], "Requires PyTorch >= 1.3"
 
 
+def make_cuda_ext(name, module, sources):
+
+    define_macros = []
+
+    if torch.cuda.is_available() or os.getenv('FORCE_CUDA', '0') == '1':
+        define_macros += [('WITH_CUDA', None)]
+    else:
+        raise EnvironmentError('CUDA is required to compile MMDetection!')
+
+    return CUDAExtension(
+        name='{}.{}'.format(module, name),
+        sources=[os.path.join(*module.split('.'), p) for p in sources],
+        define_macros=define_macros,
+        extra_compile_args={
+            'cxx': [],
+            'nvcc': [
+                '-D__CUDA_NO_HALF_OPERATORS__',
+                '-D__CUDA_NO_HALF_CONVERSIONS__',
+                '-D__CUDA_NO_HALF2_OPERATORS__',
+            ]
+        })
+
+
+
 def get_extensions():
     this_dir = os.path.dirname(os.path.abspath(__file__))
     extensions_dir = os.path.join(this_dir, "models", "ops")
 
-    main_source = os.path.join(extensions_dir, "vision.cpp")
+    # main_source = os.path.join(extensions_dir, "vision.cpp")
     sources = glob.glob(os.path.join(extensions_dir, "**", "*.cpp"))
     source_cuda = glob.glob(os.path.join(extensions_dir, "**", "*.cu")) + glob.glob(
         os.path.join(extensions_dir, "*.cu")
     )
 
-    sources = [main_source] + sources
+    # sources = [main_source] + sources
     extension = CppExtension
 
     extra_compile_args = {"cxx": []}
@@ -54,10 +78,18 @@ def get_extensions():
             include_dirs=include_dirs,
             define_macros=define_macros,
             extra_compile_args=extra_compile_args,
-        )
+        ),
+        make_cuda_ext(
+            name='deform_conv_cuda',
+            module='models.ops.dcn',
+            sources=[
+                'src/deform_conv_cuda.cu',
+                'src/deform_conv_cuda_kernel.cu'
+            ]),
     ]
 
     return ext_modules
+
 
 
 setup(

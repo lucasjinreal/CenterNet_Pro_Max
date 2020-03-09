@@ -31,6 +31,7 @@ def print_dict_shape(d, mark):
     for k, v in d.items():
         logging.info('{} dict shape: {}: {}'.format(mark, k, v.shape))
 
+
 class CenterNet(nn.Module):
     """
     Implement CenterNet (https://arxiv.org/abs/1904.07850).
@@ -177,7 +178,6 @@ class CenterNet(nn.Module):
 
         ori_w, ori_h = img_info['center'] * 2
         det_instance = Instances((int(ori_h), int(ori_w)), **results)
-
         return [{"instances": det_instance}]
 
     def decode_prediction(self, pred_dict, img_info):
