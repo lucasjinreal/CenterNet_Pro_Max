@@ -12,7 +12,7 @@ _config_dict = dict(
         # WEIGHTS="detectron2://ImageNetPretrained/MSRA/R-18.pth",
         WEIGHTS="",
         MASK_ON=False,
-        RESNETS=dict(DEPTH=101),
+        RESNETS=dict(DEPTH=18),
         PIXEL_MEAN=[0.485, 0.456, 0.406],
         PIXEL_STD=[0.229, 0.224, 0.225],
         CENTERNET=dict(

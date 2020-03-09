@@ -16,6 +16,7 @@ from models.train.trainer import DefaultTrainer
 from models.evaluation.evaluator import DatasetEvaluators
 from models.train import hooks
 from alfred.utils.log import logger
+import importlib
 
 
 class Trainer(DefaultTrainer):
