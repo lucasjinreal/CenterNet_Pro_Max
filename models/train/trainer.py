@@ -124,7 +124,6 @@ class DefaultTrainer(SimpleTrainer):
         ret = [
             hooks.IterationTimer(),
             hooks.LRScheduler(self.optimizer, self.scheduler),
-            hooks.EvalHook(cfg.HOOKS.EVAL_PERIOD),
             hooks.PreciseBN(
                 # Run at the same freq as (but before) evaluation.
                 cfg.TEST.EVAL_PERIOD,
