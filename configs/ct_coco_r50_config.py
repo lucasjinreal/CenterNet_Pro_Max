@@ -79,6 +79,10 @@ _config_dict = dict(
     ),
     OUTPUT_DIR='./checkpoints/',
     GLOBAL=dict(DUMP_TEST=False),
+    HOOKS=dict(
+        EVAL_PERIOD=500,
+        LOG_PERIOD=50,
+    )
 )
 
 

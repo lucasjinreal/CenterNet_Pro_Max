@@ -124,6 +124,7 @@ class DefaultTrainer(SimpleTrainer):
         ret = [
             hooks.IterationTimer(),
             hooks.LRScheduler(self.optimizer, self.scheduler),
+            hooks.EvalHook(cfg.HOOKS.EVAL_PERIOD),
             hooks.PreciseBN(
                 # Run at the same freq as (but before) evaluation.
                 cfg.TEST.EVAL_PERIOD,
@@ -153,7 +154,7 @@ class DefaultTrainer(SimpleTrainer):
 
         if comm.is_main_process():
             # run writers in the end, so that evaluation metrics are written
-            ret.append(hooks.PeriodicWriter(self.build_writers()))
+            ret.append(hooks.PeriodicWriter(self.build_writers(), period=cfg.HOOKS.LOG_PERIOD))
         return ret
 
     def build_writers(self):
