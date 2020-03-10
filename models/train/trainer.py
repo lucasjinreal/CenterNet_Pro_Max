@@ -10,15 +10,13 @@ import alfred.dl.torch.distribute.utils as comm
 from .train_loop import SimpleTrainer
 from .checkpoint import DetectionCheckpointer
 
-from alfred.utils.log import logger as logging
+from alfred.utils.log import logger
 from .build import build_optimizer, build_lr_scheduler
 from ..data.build import build_detection_test_loader, build_detection_train_loader
 from ..evaluation.evaluator import DatasetEvaluator, inference_on_dataset
 from . import hooks
 from ..utils.nn_utils import get_bn_modules, update_bn_stats
-from ..utils.events import (CommonMetricPrinter, JSONWriter,
-                                 TensorboardXWriter)
-
+from ..utils.events import (CommonMetricPrinter, JSONWriter, TensorboardXWriter)
 
 
 class DefaultTrainer(SimpleTrainer):
@@ -237,7 +235,6 @@ class DefaultTrainer(SimpleTrainer):
         Returns:
             dict: a dict of result metrics
         """
-        logger = logging.getLogger(__name__)
         if isinstance(evaluators, DatasetEvaluator):
             evaluators = [evaluators]
         if evaluators is not None:
