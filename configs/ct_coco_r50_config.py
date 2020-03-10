@@ -26,7 +26,7 @@ _config_dict = dict(
             DOWN_SCALE=4,
             MIN_OVERLAP=0.7,
             TENSOR_DIM=128,
-            BN_MOMENTUM = 0.1
+            BN_MOMENTUM=0.1
         ),
         LOSS=dict(
             CLS_WEIGHT=1,

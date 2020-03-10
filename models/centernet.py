@@ -154,6 +154,7 @@ class CenterNet(nn.Module):
         center_wh = np.array([w // 2, h // 2], dtype=np.float32)
         size_wh = np.array([new_w, new_h], dtype=np.float32)
         down_scale = self.cfg.MODEL.CENTERNET.DOWN_SCALE
+        # it was 512 to 128, so that be 4
         img_info = dict(center=center_wh, size=size_wh,
                         height=new_h // down_scale,
                         width=new_w // down_scale)
@@ -174,7 +175,8 @@ class CenterNet(nn.Module):
         det_instance = Instances((int(ori_h), int(ori_w)), **results)
         return [{"instances": det_instance}]
 
-    def decode_prediction(self, pred_dict, img_info):
+    @staticmethod
+    def decode_prediction(pred_dict, img_info):
         """
         Args:
             pred_dict(dict): a dict contains all information of prediction
@@ -189,6 +191,11 @@ class CenterNet(nn.Module):
         scores = scores.reshape(-1)
         classes = classes.reshape(-1).to(torch.int64)
 
+        # only keep score bigger than 0.1
+        keep_idx = torch.nonzero(scores > 0.1).reshape(-1)
+        scores = scores[keep_idx]
+        classes = classes[keep_idx]
+        boxes = boxes[:, keep_idx, :]
         # dets = CenterNetDecoder.decode(fmap, wh, reg)
         boxes = CenterNetDecoder.transform_boxes(boxes, img_info)
         boxes = Boxes(boxes)
