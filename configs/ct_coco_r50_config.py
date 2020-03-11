@@ -71,9 +71,9 @@ _config_dict = dict(
         ),
         LR_SCHEDULER=dict(
             GAMMA=0.1,
-            STEPS=(81000, 108000),
-            MAX_ITER=126000,
-            WARMUP_ITERS=1000,
+            STEPS=(641000, 408000),
+            MAX_ITER=826000,
+            WARMUP_ITERS=8000,
         ),
         IMS_PER_BATCH=8,
     ),
