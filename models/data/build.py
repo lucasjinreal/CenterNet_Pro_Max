@@ -20,6 +20,7 @@ from .detection_utils import check_metadata_consistency
 
 from alfred.dl.torch.distribute.utils import get_world_size
 from alfred.dl.torch.env import seed_all_rng
+from alfred.utils.log import logger
 
 """
 This file contains the default logic to build a dataloader for training or testing.
@@ -56,7 +57,6 @@ def filter_images_with_only_crowd_annotations(dataset_dicts):
 
     dataset_dicts = [x for x in dataset_dicts if valid(x["annotations"])]
     num_after = len(dataset_dicts)
-    logger = logging.getLogger(__name__)
     logger.info(
         "Removed {} images with no usable annotations. {} images left.".format(
             num_before - num_after, num_after
@@ -90,7 +90,6 @@ def filter_images_with_few_keypoints(dataset_dicts, min_keypoints_per_image):
         x for x in dataset_dicts if visible_keypoints_in_image(x) >= min_keypoints_per_image
     ]
     num_after = len(dataset_dicts)
-    logger = logging.getLogger(__name__)
     logger.info(
         "Removed {} images with fewer than {} keypoints.".format(
             num_before - num_after, min_keypoints_per_image
@@ -117,7 +116,6 @@ def load_proposals_into_dataset(dataset_dicts, proposal_file):
     Returns:
         list[dict]: the same format as dataset_dicts, but added proposal field.
     """
-    logger = logging.getLogger(__name__)
     logger.info("Loading proposals from: {}".format(proposal_file))
 
     with open(proposal_file, "rb") as f:
@@ -342,7 +340,6 @@ def build_detection_train_loader(cfg, mapper=None):
     dataset = MapDataset(dataset, mapper)
 
     sampler_name = cfg.DATALOADER.SAMPLER_TRAIN
-    logger = logging.getLogger(__name__)
     logger.info("Using training sampler {}".format(sampler_name))
     if sampler_name == "TrainingSampler":
         sampler = samplers.TrainingSampler(len(dataset))
