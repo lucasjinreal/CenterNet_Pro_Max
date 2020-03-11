@@ -1,4 +1,4 @@
-from configs.ct_coco_r50_config import config
+from configs.ct_coco_r50_dcn_config import config
 from models.data import MetadataCatalog
 from models.centernet import build_model
 from models.train.checkpoint import DetectionCheckpointer
@@ -64,7 +64,7 @@ if __name__ == '__main__':
             print('b.pred_boxes: {}'.format(boxes))
             print('b.scores: {}'.format(scores))
             print('b.pred_classes: {}'.format(classes))
-            visualize_det_cv2_part(ori_img, scores, classes, boxes, class_names=coco_label_map_list, thresh=0.01,
+            visualize_det_cv2_part(ori_img, scores, classes, boxes, class_names=coco_label_map_list, thresh=0.2,
                                    is_show=True)
     else:
         ori_img = cv2.imread(data_f)
@@ -75,5 +75,5 @@ if __name__ == '__main__':
         print('b.pred_boxes: {}'.format(boxes))
         print('b.scores: {}'.format(scores))
         print('b.pred_classes: {}'.format(classes))
-        visualize_det_cv2_part(ori_img, scores, classes, boxes, class_names=coco_label_map_list, thresh=0.01,
+        visualize_det_cv2_part(ori_img, scores, classes, boxes, class_names=coco_label_map_list, thresh=0.2,
                                is_show=True)
