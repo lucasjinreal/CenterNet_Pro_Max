@@ -63,10 +63,9 @@ _config_dict = dict(
         TEST=("coco_2017_val",),
     ),
     SOLVER=dict(
-        # this lr work on 1 gpu, try SGD as well
         OPTIMIZER=dict(
             NAME="Adam",
-            BASE_LR=1.25e-3,
+            BASE_LR=1.25e-4,
             WEIGHT_DECAY=1e-4,
             AMSGRAD=True,
         ),
@@ -76,7 +75,7 @@ _config_dict = dict(
             MAX_ITER=826000,
             WARMUP_ITERS=2000,
         ),
-        IMS_PER_BATCH=12,
+        IMS_PER_BATCH=8,
     ),
     OUTPUT_DIR='./checkpoints/',
     GLOBAL=dict(DUMP_TEST=False),
