@@ -16,7 +16,7 @@ _config_dict = dict(
         PIXEL_MEAN=[0.485, 0.456, 0.406],
         PIXEL_STD=[0.229, 0.224, 0.225],
         CENTERNET=dict(
-            USE_DCN=False,
+            USE_DCN=True,
             HEAD_CONV=64,
             DECONV_CHANNEL=[2048, 256, 128, 64],
             DECONV_KERNEL=[4, 4, 4],
@@ -63,25 +63,23 @@ _config_dict = dict(
         TEST=("coco_2017_val",),
     ),
     SOLVER=dict(
-        # this lr work on 1 gpu, try SGD as well
         OPTIMIZER=dict(
             NAME="Adam",
-            BASE_LR=1.25e-3,
-            WEIGHT_DECAY=1e-4,
+            BASE_LR=0.0125,
+            WEIGHT_DECAY=1e-3,
             AMSGRAD=True,
         ),
         LR_SCHEDULER=dict(
             GAMMA=0.1,
-            STEPS=(241000, 408000),
-            MAX_ITER=826000,
-            WARMUP_ITERS=2000,
+            STEPS=(81000, 108000),
+            MAX_ITER=126000,
+            WARMUP_ITERS=1000,
         ),
-        IMS_PER_BATCH=12,
+        IMS_PER_BATCH=8,
     ),
     OUTPUT_DIR='./checkpoints/',
     GLOBAL=dict(DUMP_TEST=False),
     HOOKS=dict(
-        # judge this by epochs rather than iters, different dataset has different iters
         EVAL_PERIOD=500,
         LOG_PERIOD=50,
     )

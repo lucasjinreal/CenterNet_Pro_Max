@@ -45,3 +45,4 @@ tools/dl_test
 tools/dl_train
 checkpoints/
 vendor/
+env/

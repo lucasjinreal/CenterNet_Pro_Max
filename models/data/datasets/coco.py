@@ -14,13 +14,12 @@ from models.structures import Boxes, BoxMode, PolygonMasks
 from alfred.utils.file_io import PathManager
 from alfred.utils.timer import Timer
 from .. import DatasetCatalog, MetadataCatalog
+from alfred.utils.log import logger
 
 """
 This file contains functions to parse COCO-format annotations into dicts in "dl_lib format".
 """
 
-
-logger = logging.getLogger(__name__)
 
 __all__ = ["load_coco_json", "load_sem_seg"]
 
