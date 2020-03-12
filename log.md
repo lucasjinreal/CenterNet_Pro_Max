@@ -1,3 +1,6 @@
+
+- 2020.03.12: detection model is converged, try adding a mask head to train an instance segmentation model beyond CenterNet.
+
 - 2020.03.09: Changes dcn to mmdetection version, changed setup.py installation steps, but more doesn't converge that is a big problem.
 
 - dcn head and deconv head not same:
