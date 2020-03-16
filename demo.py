@@ -48,7 +48,7 @@ class DefaultPredictor:
 
 
 if __name__ == '__main__':
-    config.MODEL.WEIGHTS = './checkpoints/model_0084999.pth'
+    config.MODEL.WEIGHTS = './checkpoints/model_0249999.pth'
     # config.MODEL.WEIGHTS = 'checkpoints/resnet50_centernet.pth'
     predictor = DefaultPredictor(config)
     coco_label_map_list = coco_label_map_list[1:]
@@ -65,7 +65,7 @@ if __name__ == '__main__':
             print('b.pred_boxes: {}'.format(boxes))
             print('b.scores: {}'.format(scores))
             print('b.pred_classes: {}'.format(classes))
-            visualize_det_cv2_part(ori_img, scores, classes, boxes, class_names=coco_label_map_list, thresh=0.01,
+            visualize_det_cv2_part(ori_img, scores, classes, boxes, class_names=coco_label_map_list, thresh=0.16,
                                    is_show=True)
     else:
         ori_img = cv2.imread(data_f)
@@ -76,5 +76,5 @@ if __name__ == '__main__':
         print('b.pred_boxes: {}'.format(boxes))
         print('b.scores: {}'.format(scores))
         print('b.pred_classes: {}'.format(classes))
-        visualize_det_cv2_part(ori_img, scores, classes, boxes, class_names=coco_label_map_list, thresh=0.01,
+        visualize_det_cv2_part(ori_img, scores, classes, boxes, class_names=coco_label_map_list, thresh=0.16,
                                is_show=True)
