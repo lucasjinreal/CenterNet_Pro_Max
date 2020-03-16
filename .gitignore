@@ -46,3 +46,4 @@ tools/dl_train
 checkpoints/
 vendor/
 env/
+weights/

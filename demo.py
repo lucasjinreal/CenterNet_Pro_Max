@@ -48,12 +48,15 @@ class DefaultPredictor:
 
 
 if __name__ == '__main__':
-    config.MODEL.WEIGHTS = './checkpoints/model_0249999.pth'
+    config.MODEL.WEIGHTS = 'weights/centernet_r50_coco.pth'
     # config.MODEL.WEIGHTS = 'checkpoints/resnet50_centernet.pth'
     predictor = DefaultPredictor(config)
     coco_label_map_list = coco_label_map_list[1:]
 
-    data_f = sys.argv[1]
+    if len(sys.argv) > 1:
+        data_f = sys.argv[1]
+    else:
+        data_f = './images'
     if os.path.isdir(data_f):
         img_files = glob.glob(os.path.join(data_f, '*.jpg'))
         for img_f in img_files:
