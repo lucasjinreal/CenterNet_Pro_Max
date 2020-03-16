@@ -4,11 +4,30 @@ import numpy as np
 import torch
 import torch.nn as nn
 
-from dl_lib.layers import ShapeSpec
-from dl_lib.structures import Boxes, ImageList, Instances
+# disable fancy structures
+from .ops.shape_spec import ShapeSpec
 
-from .generator import CenterNetDecoder, CenterNetGT
-from .loss import modified_focal_loss, reg_l1_loss
+# does boxes and ImageList really needed?
+from .structures import Boxes, ImageList, Instances
+from .networks.generator import CenterNetDecoder, CenterNetGT
+from .networks.loss import modified_focal_loss, reg_l1_loss
+from alfred.utils.log import logger as logging
+
+from .networks.head.centernet_head import CenternetHead
+from .backbone.backbone import Backbone
+from .backbone.resnet_backbone import ResnetBackbone
+
+
+"""
+[WIP] combining CenterNet and a Mask head make it same as CenterMask
+
+
+"""
+
+
+def print_dict_shape(d, mark):
+    for k, v in d.items():
+        logging.info('{} dict shape: {}: {}'.format(mark, k, v.shape))
 
 
 class CenterNet(nn.Module):
@@ -68,8 +87,12 @@ class CenterNet(nn.Module):
             return self.inference(images)
 
         features = self.backbone(images.tensor)
+        # print('backbone out feature size: {}'.format(features.shape))
         up_fmap = self.upsample(features)
+        # print('after deconv shape: {}'.format(up_fmap.shape))
         pred_dict = self.head(up_fmap)
+        # print_dict_shape(pred_dict, 'pred')
+        # print(self.head)
 
         gt_dict = self.get_ground_truth(batched_inputs)
 
@@ -138,6 +161,7 @@ class CenterNet(nn.Module):
         center_wh = np.array([w // 2, h // 2], dtype=np.float32)
         size_wh = np.array([new_w, new_h], dtype=np.float32)
         down_scale = self.cfg.MODEL.CENTERNET.DOWN_SCALE
+        # it was 512 to 128, so that be 4
         img_info = dict(center=center_wh, size=size_wh,
                         height=new_h // down_scale,
                         width=new_w // down_scale)
@@ -156,10 +180,10 @@ class CenterNet(nn.Module):
 
         ori_w, ori_h = img_info['center'] * 2
         det_instance = Instances((int(ori_h), int(ori_w)), **results)
-
         return [{"instances": det_instance}]
 
-    def decode_prediction(self, pred_dict, img_info):
+    @staticmethod
+    def decode_prediction(pred_dict, img_info):
         """
         Args:
             pred_dict(dict): a dict contains all information of prediction
@@ -174,6 +198,11 @@ class CenterNet(nn.Module):
         scores = scores.reshape(-1)
         classes = classes.reshape(-1).to(torch.int64)
 
+        # only keep score bigger than 0.1
+        keep_idx = torch.nonzero(scores > 0.1).reshape(-1)
+        scores = scores[keep_idx]
+        classes = classes[keep_idx]
+        boxes = boxes[:, keep_idx, :]
         # dets = CenterNetDecoder.decode(fmap, wh, reg)
         boxes = CenterNetDecoder.transform_boxes(boxes, img_info)
         boxes = Boxes(boxes)
@@ -187,3 +216,32 @@ class CenterNet(nn.Module):
         images = [self.normalizer(img / 255) for img in images]
         images = ImageList.from_tensors(images, self.backbone.size_divisibility)
         return images
+
+
+def build_model(cfg):
+    def build_backbone(cfg, input_shape=None):
+        if input_shape is None:
+            input_shape = ShapeSpec(channels=len(cfg.MODEL.PIXEL_MEAN))
+        backbone = ResnetBackbone(cfg, input_shape)
+        assert isinstance(backbone, Backbone)
+        return backbone
+
+    def build_head(cfg, ):
+        head = CenternetHead(cfg)
+        return head
+
+    def build_upsample_layers(cfg, ):
+        if cfg.MODEL.CENTERNET.USE_DCN:
+            from .networks.head.centernet_deconv_dc import CenternetDeconv
+            logging.info('build model with DCN support.')
+            upsample = CenternetDeconv(cfg)
+        else:
+            from .networks.head.centernet_deconv import CenternetDeconv
+            upsample = CenternetDeconv(cfg)
+        return upsample
+
+    cfg.build_backbone = build_backbone
+    cfg.build_upsample_layers = build_upsample_layers
+    cfg.build_head = build_head
+    model = CenterNet(cfg)
+    return model
