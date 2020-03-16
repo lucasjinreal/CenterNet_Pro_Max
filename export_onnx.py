@@ -67,6 +67,11 @@ class DefaultPredictor:
         image = torch.as_tensor(image.astype("float32").transpose(2, 0, 1))
         inputs = {"image": image, "height": height, "width": width}
         predictions = self.model([inputs])[0]
+
+        print('try exporting onnx model...')
+        onnx_model_f = 'centernet_r50_coco.onnx'
+        torch.onnx.export(self.model, [inputs], onnx_model_f)
+        print('onnx exported!')
         return predictions
 
 
@@ -85,6 +90,7 @@ if __name__ == '__main__':
         for img_f in img_files:
             ori_img = cv2.imread(img_f)
             b = predictor(ori_img)['instances']
+
             boxes = b.pred_boxes.tensor.cpu().numpy()
             scores = b.scores.cpu().numpy()
             classes = b.pred_classes.cpu().numpy()
@@ -93,6 +99,7 @@ if __name__ == '__main__':
             print('b.pred_classes: {}'.format(classes))
             visualize_det_cv2_part(ori_img, scores, classes, boxes, class_names=coco_label_map_list, thresh=0.16,
                                    is_show=True)
+            exit(0)
     else:
         ori_img = cv2.imread(data_f)
         b = predictor(ori_img)['instances']
