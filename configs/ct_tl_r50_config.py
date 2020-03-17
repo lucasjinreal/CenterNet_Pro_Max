@@ -25,6 +25,10 @@
 
 custom your config here
 
+
+this is used for training trafficlight detection model
+
+
 """
 from models.configs.base_detection_config import config, BaseDetectionConfig
 import os.path as osp
@@ -35,7 +39,7 @@ _config_dict = dict(
         # WEIGHTS="detectron2://ImageNetPretrained/MSRA/R-18.pth",
         WEIGHTS="",
         MASK_ON=False,
-        RESNETS=dict(DEPTH=18),
+        RESNETS=dict(DEPTH=50),
         PIXEL_MEAN=[0.485, 0.456, 0.406],
         PIXEL_STD=[0.229, 0.224, 0.225],
         CENTERNET=dict(
@@ -49,7 +53,7 @@ _config_dict = dict(
             DOWN_SCALE=4,
             MIN_OVERLAP=0.7,
             TENSOR_DIM=128,
-            BN_MOMENTUM = 0.1
+            BN_MOMENTUM=0.1
         ),
         LOSS=dict(
             CLS_WEIGHT=1,
@@ -86,23 +90,25 @@ _config_dict = dict(
         TEST=("coco_2017_val",),
     ),
     SOLVER=dict(
+        # this lr work on 1 gpu, try SGD as well
         OPTIMIZER=dict(
             NAME="Adam",
-            BASE_LR=0.0125,
-            WEIGHT_DECAY=1e-3,
+            BASE_LR=1.25e-3,
+            WEIGHT_DECAY=1e-4,
             AMSGRAD=True,
         ),
         LR_SCHEDULER=dict(
             GAMMA=0.1,
-            STEPS=(81000, 108000),
-            MAX_ITER=126000,
-            WARMUP_ITERS=1000,
+            STEPS=(241000, 408000),
+            MAX_ITER=826000,
+            WARMUP_ITERS=2000,
         ),
-        IMS_PER_BATCH=8,
+        IMS_PER_BATCH=12,
     ),
     OUTPUT_DIR='./checkpoints/',
     GLOBAL=dict(DUMP_TEST=False),
     HOOKS=dict(
+        # judge this by epochs rather than iters, different dataset has different iters
         EVAL_PERIOD=500,
         LOG_PERIOD=50,
     )

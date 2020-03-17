@@ -1,3 +1,26 @@
+#
+# Copyright (c) 2020 jintian.
+#
+# This file is part of centernet_pro
+# (see jinfgang.github.io).
+#
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
+#
 from configs.ct_coco_r50_config import config
 from models.data import MetadataCatalog
 from models.centernet import build_model
@@ -49,11 +72,15 @@ class DefaultPredictor:
 
 if __name__ == '__main__':
     config.MODEL.WEIGHTS = './checkpoints/model_0329999.pth'
+    # config.MODEL.WEIGHTS = 'weights/centernet_r50_coco.pth'
     # config.MODEL.WEIGHTS = 'checkpoints/resnet50_centernet.pth'
     predictor = DefaultPredictor(config)
     coco_label_map_list = coco_label_map_list[1:]
 
-    data_f = sys.argv[1]
+    if len(sys.argv) > 1:
+        data_f = sys.argv[1]
+    else:
+        data_f = './images'
     if os.path.isdir(data_f):
         img_files = glob.glob(os.path.join(data_f, '*.jpg'))
         for img_f in img_files:
