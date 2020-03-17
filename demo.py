@@ -71,7 +71,7 @@ class DefaultPredictor:
 
 
 if __name__ == '__main__':
-    config.MODEL.WEIGHTS = './checkpoints/model_0329999.pth'
+    config.MODEL.WEIGHTS = './checkpoints/model_0339999.pth'
     # config.MODEL.WEIGHTS = 'weights/centernet_r50_coco.pth'
     # config.MODEL.WEIGHTS = 'checkpoints/resnet50_centernet.pth'
     predictor = DefaultPredictor(config)

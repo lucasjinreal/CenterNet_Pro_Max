@@ -24,6 +24,12 @@ We have provide resnet50 pretrained weights and resnet101 pretrained weights (he
 python demo.py
 ```
 
+| **Backbone** | **Head**    | FPS(GTX1080ti) | mAP  | model link                                                   |
+| ------------ | ----------- | -------------- | ---- | ------------------------------------------------------------ |
+| resnet50     | without DCN |                |      | [model](https://drive.google.com/open?id=1QJaMpT5WPC1XrrptOvoUSFLC1ww9k9qu) |
+| resnet50     | with DCN    |                |      |                                                              |
+| resnet18     | without DCN |                |      |                                                              |
+
 
 
 ## Train
