@@ -28,6 +28,7 @@ _config_dict = dict(
         LOAD_PROPOSALS=False,
         MASK_ON=False,
         KEYPOINT_ON=False,
+        ONNX=False,
         RESNETS=dict(
             DEPTH=50,
             OUT_FEATURES=["res4"],

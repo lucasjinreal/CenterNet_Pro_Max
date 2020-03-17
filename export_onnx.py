@@ -65,8 +65,9 @@ class DefaultPredictor:
         image = original_image
         # we will do preprocess inside model
         image = torch.as_tensor(image.astype("float32").transpose(2, 0, 1))
-        inputs = {"image": image, "height": height, "width": width}
-        predictions = self.model([inputs])[0]
+        # inputs = {"image": image, "height": height, "width": width}
+        inputs = {"image": image,}
+        predictions = self.model([inputs])
 
         print('try exporting onnx model...')
         onnx_model_f = 'centernet_r50_coco.onnx'
@@ -77,6 +78,7 @@ class DefaultPredictor:
 
 if __name__ == '__main__':
     config.MODEL.WEIGHTS = 'weights/model_0329999.pth'
+    config.MODEL.ONNX = True
     # config.MODEL.WEIGHTS = 'checkpoints/resnet50_centernet.pth'
     predictor = DefaultPredictor(config)
     coco_label_map_list = coco_label_map_list[1:]

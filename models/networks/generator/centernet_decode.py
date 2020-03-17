@@ -30,6 +30,7 @@ import torch.nn.functional as F
 
 from models.data.transforms.transform_gen import CenterAffine
 from models.utils.nn_utils import gather_feature
+from alfred.dl.torch.common import device
 
 
 class CenterNetDecoder(object):
@@ -47,7 +48,6 @@ class CenterNetDecoder(object):
             K(int): topk value
         """
         batch, channel, height, width = fmap.shape
-
         fmap = CenterNetDecoder.pseudo_nms(fmap)
 
         scores, index, clses, ys, xs = CenterNetDecoder.topk_score(fmap, K=K)
@@ -63,21 +63,20 @@ class CenterNetDecoder(object):
 
         if cat_spec_wh:
             wh = wh.view(batch, K, channel, 2)
-            clses_ind = clses.view(batch, K, 1, 1).expand(batch, K, 1, 2).long()
+            clses_ind = clses.view(batch, K, 1, 1).expand(
+                batch, K, 1, 2).long()
             wh = wh.gather(2, clses_ind).reshape(batch, K, 2)
         else:
             wh = wh.reshape(batch, K, 2)
 
-        clses  = clses.reshape(batch, K, 1).float()
+        clses = clses.reshape(batch, K, 1).float()
         scores = scores.reshape(batch, K, 1)
 
         half_w, half_h = wh[..., 0:1] / 2, wh[..., 1:2] / 2
         bboxes = torch.cat([xs - half_w, ys - half_h,
                             xs + half_w, ys + half_h],
                            dim=2)
-
         detections = (bboxes, scores, clses)
-
         return detections
 
     @staticmethod
@@ -122,11 +121,22 @@ class CenterNetDecoder(object):
         """
         get top K point in score map
         """
-        batch, channel, height, width = scores.shape
+        # batch, channel, height, width = scores.shape
+        sh = torch.tensor(scores.shape).to(device)
+        print(sh)
+        batch = sh[0]
+        channel = sh[1]
+        height = sh[2]
+        width = sh[3]
 
         # get topk score and its index in every H x W(channel dim) feature map
-        topk_scores, topk_inds = torch.topk(scores.reshape(batch, channel, -1), K)
-
+        topk_scores, topk_inds = torch.topk(
+            scores.reshape(batch, channel, -1), K)
+        print(topk_inds)
+        print(height)
+        print(width)
+        print(height*width)
+        # print((height*width).to(device))
         topk_inds = topk_inds % (height * width)
         topk_ys = (topk_inds / width).int().float()
         topk_xs = (topk_inds % width).int().float()
@@ -135,8 +145,11 @@ class CenterNetDecoder(object):
         topk_score, index = torch.topk(topk_scores.reshape(batch, -1), K)
         # div by K because index is grouped by K(C x K shape)
         topk_clses = (index / K).int()
-        topk_inds = gather_feature(topk_inds.view(batch, -1, 1), index).reshape(batch, K)
-        topk_ys = gather_feature(topk_ys.reshape(batch, -1, 1), index).reshape(batch, K)
-        topk_xs = gather_feature(topk_xs.reshape(batch, -1, 1), index).reshape(batch, K)
+        topk_inds = gather_feature(topk_inds.view(
+            batch, -1, 1), index).reshape(batch, K)
+        topk_ys = gather_feature(topk_ys.reshape(
+            batch, -1, 1), index).reshape(batch, K)
+        topk_xs = gather_feature(topk_xs.reshape(
+            batch, -1, 1), index).reshape(batch, K)
 
         return topk_score, topk_inds, topk_clses, topk_ys, topk_xs
