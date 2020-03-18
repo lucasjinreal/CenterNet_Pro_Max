@@ -71,7 +71,7 @@ class DefaultPredictor:
 
         print('try exporting onnx model...')
         onnx_model_f = 'centernet_r50_coco.onnx'
-        torch.onnx.export(self.model, [inputs], onnx_model_f)
+        torch.onnx.export(self.model, [inputs], onnx_model_f, verbose=True)
         print('onnx exported!')
         return predictions
 

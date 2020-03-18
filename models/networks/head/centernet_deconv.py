@@ -86,34 +86,3 @@ class CenternetDeconv(nn.Module):
     def forward(self, x):
         x = self.deconv_layers(x)
         return x
-
-
-
-# class CenternetDeconv2(nn.Module):
-#     """
-#     The head used in CenterNet for object classification and box regression.
-#     It has three subnet, with a common structure but separate parameters.
-#     """
-#     def __init__(self, cfg):
-#         super(CenternetDeconv, self).__init__()
-#         # modify into config
-#         channels = cfg.MODEL.CENTERNET.DECONV_CHANNEL
-#         deconv_kernel = cfg.MODEL.CENTERNET.DECONV_KERNEL
-#         self.deconv1 = DeconvLayer(
-#             channels[0], channels[1],
-#             deconv_kernel=deconv_kernel[0],
-#         )
-#         self.deconv2 = DeconvLayer(
-#             channels[1], channels[2],
-#             deconv_kernel=deconv_kernel[1],
-#         )
-#         self.deconv3 = DeconvLayer(
-#             channels[2], channels[3],
-#             deconv_kernel=deconv_kernel[2],
-#         )
-
-#     def forward(self, x):
-#         x = self.deconv1(x)
-#         x = self.deconv2(x)
-#         x = self.deconv3(x)
-#         return x
