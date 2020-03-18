@@ -36,7 +36,7 @@ from alfred.vis.image.get_dataset_label_map import coco_label_map_list
 import glob
 
 
-class DefaultPredictor:
+class ONNXExporter:
     def __init__(self, cfg):
         self.cfg = cfg
         self.model = build_model(self.cfg)
@@ -66,14 +66,17 @@ class DefaultPredictor:
         # we will do preprocess inside model
         image = torch.as_tensor(image.astype("float32").transpose(2, 0, 1))
         # inputs = {"image": image, "height": height, "width": width}
-        inputs = {"image": image,}
-        predictions = self.model([inputs])
-
+        aligned_images = self.model.preprocess_onnx(image)
+        # predictions = self.model([inputs])
         print('try exporting onnx model...')
         onnx_model_f = 'centernet_r50_coco.onnx'
-        torch.onnx.export(self.model, [inputs], onnx_model_f, verbose=True)
+        inp_dict = {
+            "images": image,
+            "images_info":
+        }
+        torch.onnx.export(self.model, [aligned_images], onnx_model_f, verbose=True)
         print('onnx exported!')
-        return predictions
+        # return predictions
 
 
 if __name__ == '__main__':
@@ -81,7 +84,7 @@ if __name__ == '__main__':
     config.MODEL.WEIGHTS = 'checkpoints/ctdet_r50_coco_399999.pth'
     config.MODEL.ONNX = True
     # config.MODEL.WEIGHTS = 'checkpoints/resnet50_centernet.pth'
-    predictor = DefaultPredictor(config)
+    predictor = ONNXExporter(config)
     coco_label_map_list = coco_label_map_list[1:]
 
     if len(sys.argv) > 1:

@@ -50,6 +50,7 @@ class CenterNet(nn.Module):
     """
     Implement CenterNet (https://arxiv.org/abs/1904.07850).
     """
+
     def __init__(self, cfg):
         super().__init__()
 
@@ -75,9 +76,9 @@ class CenterNet(nn.Module):
         # feature_shapes = [backbone_shape[f] for f in self.in_features]
 
         self.mean, self.std = cfg.MODEL.PIXEL_MEAN, cfg.MODEL.PIXEL_STD
-        pixel_mean = torch.Tensor(self.mean).to(self.device).view(3, 1, 1)
-        pixel_std = torch.Tensor(self.std).to(self.device).view(3, 1, 1)
-        self.normalizer = lambda x: (x - pixel_mean) / pixel_std
+        self.pixel_mean = torch.Tensor(self.mean).to(self.device).view(3, 1, 1)
+        self.pixel_std = torch.Tensor(self.std).to(self.device).view(3, 1, 1)
+        self.normalizer = lambda x: (x - self.pixel_mean) / self.pixel_std
         self.to(self.device)
 
     def forward(self, batched_inputs):
@@ -97,14 +98,17 @@ class CenterNet(nn.Module):
         Returns:
             dict[str: Tensor]:
         """
-        images = self.preprocess_image(batched_inputs)
 
         if not self.training:
             if self.cfg.MODEL.ONNX:
-                return self.inference_onnx(images)
+                assert isinstance(batched_inputs,
+                                  dict), 'for ONNX mode, inputs should' \
+                                                 ' dict contains images and images_info'
+                return self.inference_onnx(batched_inputs)
             else:
+                images = self.preprocess_image(batched_inputs)
                 return self.inference(images)
-
+        images = self.preprocess_image(batched_inputs)
         features = self.backbone(images.tensor)
         # print('backbone out feature size: {}'.format(features.shape))
         up_fmap = self.upsample(features)
@@ -200,12 +204,22 @@ class CenterNet(nn.Module):
         return [{"instances": det_instance}]
 
     @torch.no_grad()
-    def inference_onnx(self, images):
+    def inference_onnx(self, batch_inputs):
         """
-        image(tensor): ImageList in dl_lib.structures
+        images(tensor): [N, 3, w, h]
+        images_info:
+        we separated preprocess out when export onnx,
+        so that you gonna need implement your own preprocess before feed into model
         """
         logging.info('this is onnx mode for onnx export, do not enable when inference via python.')
-        n, c, h, w = images.tensor.shape
+        images = batch_inputs['images']
+        w, h = batch_inputs['images_info']
+
+        images = [self.normalizer(img / 255) for img in images]
+        images = torch.tensor(images)
+
+        # todo: make it to be it.
+        # n, c, h, w = images.tensor.shape
         new_h, new_w = (h | 31) + 1, (w | 31) + 1
         center_wh = np.array([w // 2, h // 2], dtype=np.float32)
         size_wh = np.array([new_w, new_h], dtype=np.float32)
@@ -226,16 +240,37 @@ class CenterNet(nn.Module):
         up_fmap = self.upsample(features)
         pred_dict = self.head(up_fmap)
         results = self.decode_prediction(pred_dict, img_info)
+        logging.info('decode predictions done.')
         print(results)
-        ori_w, ori_h = img_info['center'] * 2
-        # det_instance = Instances((int(ori_h), int(ori_w)), **results)
-        # return [{"instances": det_instance}]
-        results['ori_sizes'] = torch.tensor([ori_w, ori_h])
-        print(results['pred_boxes'].tensor)
+        # ori_w, ori_h = img_info['center'] * 2
+        # results['ori_sizes'] = torch.tensor([ori_w, ori_h])
+        # print(results['pred_boxes'].tensor)
         results['pred_boxes'] = results['pred_boxes'].tensor
         for k, v in results.items():
             print('k: {}, v: {}'.format(k, v.type))
+        logging.info('we will return results.')
         return results
+
+    def preprocess_onnx(self, images):
+        images = [self.normalizer(img / 255) for img in images]
+        images = ImageList.from_tensors(images, self.backbone.size_divisibility)
+        n, c, h, w = images.tensor.shape
+        new_h, new_w = (h | 31) + 1, (w | 31) + 1
+        center_wh = np.array([w // 2, h // 2], dtype=np.float32)
+        size_wh = np.array([new_w, new_h], dtype=np.float32)
+        down_scale = self.cfg.MODEL.CENTERNET.DOWN_SCALE
+        # it was 512 to 128, so that be 4
+        img_info = dict(center=center_wh, size=size_wh,
+                        height=new_h // down_scale,
+                        width=new_w // down_scale)
+
+        pad_value = [-x / y for x, y in zip(self.mean, self.std)]
+        aligned_img = torch.Tensor(pad_value).reshape((1, -1, 1, 1)).expand(n, c, new_h, new_w)
+        aligned_img = aligned_img.to(images.tensor.device)
+
+        pad_w, pad_h = math.ceil((new_w - w) / 2), math.ceil((new_h - h) / 2)
+        aligned_img[..., pad_h:h + pad_h, pad_w:w + pad_w] = images.tensor
+        return aligned_img
 
     @staticmethod
     def decode_prediction(pred_dict, img_info):
@@ -268,16 +303,14 @@ class CenterNet(nn.Module):
         Normalize, pad and batch the input images.
         """
         images = [x["image"].to(self.device) for x in batched_inputs]
-        if self.cfg.MODEL.ONNX:
-            images = [self.normalizer(img / 255) for img in images]
-        else:
-            images = [self.normalizer(img / 255) for img in images]
+        images = [self.normalizer(img / 255) for img in images]
+        # for resnets, this size_divisibility actually be 0
+        # so actually, ImageList here actually do nothing
         images = ImageList.from_tensors(images, self.backbone.size_divisibility)
         return images
 
 
 def build_model(cfg):
-
     def build_backbone(cfg, input_shape=None):
         if input_shape is None:
             input_shape = ShapeSpec(channels=len(cfg.MODEL.PIXEL_MEAN))
