@@ -2,16 +2,16 @@
 
 > why this name? Because this repo based on centernet-better while there was somebody opensource another implementation which called centernet-better-plus, so that we have to using this name: centernet_pro_max. 
 
-this repo is reconstruct of original center. Unlike most implementation base on detectron2 or mmdetection, highly modulized code base make users hard to understand what's the basic idea goes. So this repo is main make it simply as much as possible, and make you can customized any idea or any new architecture you have.
+this repo is the reconstruct of original CenterNet. Unlike most implementation base on detectron2 or mmdetection, highly modulized code base makes users hard to understand what's the basic idea going on. So in this repo, we make it  as simply as possible, and let you can customized any idea or any new architecture you have.
 
-This version build upon Centernet-Better, but unlike this repo, we provide something else:
+This version build upon Centernet-Better, but unlike original repo, we provide something else:
 
 - [x] Without any lib (not based on detectron2 or based on dl_lib), it's just single folder contains some modeling scripts;
 - [x] Train is more intuitive, you can follow `train.py` and `centernet.py` to debug your own model architecture and experiments on your own losses or heads;
 - [x] **We provide demo scripts to detect and visualize**;
 - [x] We ported DCN from mmdetection with latest updates (this part is not like centernet-better);
 - [x] We provide single GPU training settings (for some smaller datasets 1 GPU is enough, also you can using 8 GPUs as well);
-- [ ] **We provide will onnx export**.
+- [ ] **We will provide onnx export**.
 - [ ] We will provide onnx export and TensorRT inference;
 - [ ] More backbones such as Vovnets;
 - [ ] **More heads such as 3D and mask and CenterFace**;
