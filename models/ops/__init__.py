@@ -1,8 +1,8 @@
 #
 # Copyright (c) 2020 jintian.
 #
-# This file is part of centernet_pro
-# (see jinfgang.github.io).
+# This file is part of CenterNet_Pro_Max
+# (see jinfagang.github.io).
 #
 # Licensed to the Apache Software Foundation (ASF) under one
 # or more contributor license agreements.  See the NOTICE file
@@ -21,8 +21,6 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-# Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved
-# Modified by Feng Wang
 from .batch_norm import FrozenBatchNorm2d, NaiveSyncBatchNorm, get_norm
 # from .deformable.deform_conv import DeformConv, ModulatedDeformConv
 # from .deformable.deform_conv_with_off import (DeformConvWithOff,

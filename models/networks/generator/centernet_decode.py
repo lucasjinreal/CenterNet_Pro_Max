@@ -2,8 +2,8 @@
 #
 # Copyright (c) 2020 jintian.
 #
-# This file is part of centernet_pro
-# (see jinfgang.github.io).
+# This file is part of CenterNet_Pro_Max
+# (see jinfagang.github.io).
 #
 # Licensed to the Apache Software Foundation (ASF) under one
 # or more contributor license agreements.  See the NOTICE file

@@ -1,8 +1,8 @@
 #
 # Copyright (c) 2020 jintian.
 #
-# This file is part of centernet_pro
-# (see jinfgang.github.io).
+# This file is part of CenterNet_Pro_Max
+# (see jinfagang.github.io).
 #
 # Licensed to the Apache Software Foundation (ASF) under one
 # or more contributor license agreements.  See the NOTICE file
@@ -21,8 +21,6 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-# Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved
-from . import transforms  # isort:skip
 
 from .build import (build_detection_test_loader, build_detection_train_loader,
                     get_detection_dataset_dicts, load_proposals_into_dataset,
