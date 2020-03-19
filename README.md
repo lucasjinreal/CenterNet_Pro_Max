@@ -24,7 +24,7 @@ This version build upon Centernet-Better, but unlike original repo, we provide s
 ## Updates
 
 - *2050.01.01*: more news to come;
-- 2020.03.20*: CenterFace model supported!.
+- *2020.03.20*: CenterFace model supported!.
 - *2020.03.19*: First release the codes, meanwhile centerface model architecture has been added in.
 
 
