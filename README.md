@@ -1,4 +1,6 @@
-# CenterNet Pro
+# CenterNet Pro Max
+
+> why this name? Because this repo based on centernet-better while there was somebody opensource another implementation which called centernet-better-plus, so that we have to using this name: centernet_pro_max. 
 
 this repo is reconstruct of original center. Unlike most implementation base on detectron2 or mmdetection, highly modulized code base make users hard to understand what's the basic idea goes. So this repo is main make it simply as much as possible, and make you can customized any idea or any new architecture you have.
 
@@ -13,6 +15,14 @@ This version build upon Centernet-Better, but unlike this repo, we provide somet
 - [ ] We will provide onnx export and TensorRT inference;
 - [ ] More backbones such as Vovnets;
 - [ ] More heads such as 3D and mask;
+- [x] CenterFace model ready;
+
+
+
+## Updates
+
+- *2020.03.21*: more news to come.
+- *2020.03.19*: First release the codes, meanwhile centerface model architecture has been added in.
 
 
 
@@ -43,3 +53,8 @@ python train.py
 
 
 
+
+
+## Reference
+
+thanks to original author of CenterNet-Better, and there also some implementations such as CenterNet-Bettter-Plus, but keep in mind that CenterNet-Pro-Max is always the best!
