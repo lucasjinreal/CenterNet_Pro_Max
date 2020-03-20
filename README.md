@@ -78,8 +78,11 @@ This version build upon Centernet-Better, but unlike original repo, we provide s
 We have provide resnet50 pretrained weights and resnet101 pretrained weights (head without DCN), to run demo visualize, simply:
 
 ```
+sudo pip3 install alfred-py
 python demo.py
 ```
+
+`alfred-py` is a deep learning util lib for visualization and common utils, github url: https://github.com/jinfagang/alfred, you can easy install from pip.
 
 ![](https://s1.ax1x.com/2020/03/19/8rWijK.png)
 
