@@ -24,7 +24,51 @@ This version build upon Centernet-Better, but unlike original repo, we provide s
 ## Updates
 
 - *2050.01.01*: more news to come;
+
+- *2050.03.21*: Thanks for issue: [#3](https://github.com/jinfagang/CenterNet_Pro_Max/issues/3) pointed out, gaussian radius calculate method has been updated. What's gaussian radius? From my perspective, we want keep all alternative boxes that top left and right bottom point with some range, this picture can explain this:
+
+  ![](https://pic3.zhimg.com/80/v2-2c6dcd69318e8650eddab6a4c82407ba_720w.jpg)
+
+  we want keep all boxes that corner point within a certain range, how to calculate this range? We using gaussian radius, in code we updated to:
+
+  ```python
+  @staticmethod
+  def get_gaussian_radius(box_size, min_overlap):
+      """
+      copyed from CornerNet
+      box_size (w, h), it could be a torch.Tensor, numpy.ndarray, list or tuple
+      notice: we are using a bug-version, please refer to fix bug version in CornerNet
+      """
+      box_tensor = torch.Tensor(box_size)
+      width, height = box_tensor[..., 0], box_tensor[..., 1]
+  
+      a1  = 1
+      b1  = (height + width)
+      c1  = width * height * (1 - min_overlap) / (1 + min_overlap)
+      sq1 = torch.sqrt(b1 ** 2 - 4 * a1 * c1)
+      # r1  = (b1 + sq1) / 2
+      r1 = (b1 - sq1)/(2*a1)
+  
+      a2  = 4
+      b2  = 2 * (height + width)
+      c2  = (1 - min_overlap) * width * height
+      sq2 = torch.sqrt(b2 ** 2 - 4 * a2 * c2)
+      # r2  = (b2 + sq2) / 2
+      r1 = (b2 - sq2) / (2*a2)
+  
+      a3  = 4 * min_overlap
+      b3  = -2 * min_overlap * (height + width)
+      c3  = (min_overlap - 1) * width * height
+      sq3 = torch.sqrt(b3 ** 2 - 4 * a3 * c3)
+      # r3  = (b3 + sq3) / 2
+      r3 = (b3 + sq3) / (2*a3)
+      return torch.min(r1, torch.min(r2, r3))
+  ```
+
+  more info can refer to that issue.
+
 - *2020.03.20*: CenterFace model supported!.
+
 - *2020.03.19*: First release the codes, meanwhile centerface model architecture has been added in.
 
 
