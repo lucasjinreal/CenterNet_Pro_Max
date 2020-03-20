@@ -23,17 +23,19 @@
 #
 import os
 import torch
-from configs.ct_coco_r50_config import config
+from configs.coco.ct_coco_r50_config import config
 from typing import Any, Dict, List
 import argparse
-from models.train.trainer import DefaultTrainer
-from models.evaluation.evaluator import DatasetEvaluators
-from models.train import hooks
 
 from models.data import MetadataCatalog
+from models.centernet import build_model
+
 from models.evaluation.coco_evaluation import COCOEvaluator
 from models.evaluation.pascal_voc_evaluation import PascalVOCDetectionEvaluator
-from models.centernet import build_model
+from models.train.trainer import DefaultTrainer
+
+from models.evaluation.evaluator import DatasetEvaluators
+from models.train import hooks
 
 from alfred.utils.log import logger
 from alfred.utils.log import logger as logging

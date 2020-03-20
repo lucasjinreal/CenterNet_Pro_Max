@@ -31,16 +31,19 @@ import time
 from collections import Counter
 import torch
 
-import alfred.dl.torch.distribute.utils as comm
 from ..evaluation.testing import flatten_results_dict
 from ..utils.nn_utils import get_bn_modules, update_bn_stats
+
 from ..utils.checkpoint import \
     PeriodicCheckpointer as _PeriodicCheckpointer
 from ..utils.events import EventStorage, EventWriter
+from .train_loop import HookBase
+
 from alfred.utils.file_io import PathManager
 from alfred.utils.timer import Timer
 from alfred.utils.log import logger
-from .train_loop import HookBase
+import alfred.dl.torch.distribute.utils as comm
+
 
 __all__ = [
     "CallbackHook",

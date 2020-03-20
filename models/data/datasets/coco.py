@@ -435,34 +435,3 @@ def convert_to_coco_json(dataset_name, output_folder="", allow_cached=True):
     return cache_path
 
 
-if __name__ == "__main__":
-    """
-    Test the COCO json dataset loader.
-
-    Usage:
-        python -m dl_lib.data.datasets.coco \
-            path/to/json path/to/image_root dataset_name
-
-        "dataset_name" can be "coco_2014_minival_100", or other
-        pre-registered ones
-    """
-    from dl_lib.utils.logger import setup_logger
-    from dl_lib.utils.visualizer import Visualizer
-    import dl_lib.data.datasets  # noqa # add pre-defined metadata
-    import sys
-
-    logger = setup_logger(name=__name__)
-    assert sys.argv[3] in DatasetCatalog.list()
-    meta = MetadataCatalog.get(sys.argv[3])
-
-    dicts = load_coco_json(sys.argv[1], sys.argv[2], sys.argv[3])
-    logger.info("Done loading {} samples.".format(len(dicts)))
-
-    dirname = "coco-data-vis"
-    os.makedirs(dirname, exist_ok=True)
-    for d in dicts:
-        img = np.array(Image.open(d["file_name"]))
-        visualizer = Visualizer(img, metadata=meta)
-        vis = visualizer.draw_dataset_dict(d)
-        fpath = os.path.join(dirname, os.path.basename(d["file_name"]))
-        vis.save(fpath)
