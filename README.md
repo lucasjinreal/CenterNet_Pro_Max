@@ -99,11 +99,14 @@ python demo.py
 
 | **Backbone** | **Head**    | FPS(GTX1080ti) | mAP               | model link                                                   |
 | ------------ | ----------- | -------------- | ----------------- | ------------------------------------------------------------ |
-| resnet50     | without DCN |                | 35.7 (**3.1%** )↑ | [model](https://drive.google.com/open?id=1QJaMpT5WPC1XrrptOvoUSFLC1ww9k9qu) |
+| resnet50     | without DCN |                | 35.7 (**3.1%** )↑ | [model](https://drive.google.com/open?id=1QJaMpT5WPC1XrrptOvoUSFLC1ww9k9qu) [newest model](https://share.weiyun.com/5w85xMm) |
 | resnet50     | with DCN    |                |                   |                                                              |
 | resnet18     | without DCN |                |                   |                                                              |
+| resnet18     | with DCN    |                | -                 |                                                              |
+| volvenet39   |             |                |                   |                                                              |
+| mobilenetv3  |             |                |                   |                                                              |
 
-*the model linked above maybe updates in the future, so pls subscribe our updates!
+the model linked above maybe updates in the future, so pls subscribe our updates! CenterFace will update once we finished training. 
 
 
 
