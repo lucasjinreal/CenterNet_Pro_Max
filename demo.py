@@ -21,7 +21,7 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-from configs.ct_coco_r50_config import config
+from configs.coco.ct_coco_r50_config import config
 from models.data import MetadataCatalog
 from models.centernet import build_model
 from models.train.checkpoint import DetectionCheckpointer
@@ -71,7 +71,8 @@ class DefaultPredictor:
 
 
 if __name__ == '__main__':
-    config.MODEL.WEIGHTS = './checkpoints/model_0509999.pth'
+    # config.MODEL.WEIGHTS = './checkpoints/model_0509999.pth'
+    config.MODEL.WEIGHTS = './checkpoints/ctdet_r50_coco_399999.pth'
     # config.MODEL.WEIGHTS = 'weights/centernet_r50_coco.pth'
     # config.MODEL.WEIGHTS = 'checkpoints/resnet50_centernet.pth'
     predictor = DefaultPredictor(config)

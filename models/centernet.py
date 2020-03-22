@@ -212,8 +212,13 @@ class CenterNet(nn.Module):
         so that you gonna need implement your own preprocess before feed into model
         """
         logging.info('this is onnx mode for onnx export, do not enable when inference via python.')
-        images = batch_inputs['images']
-        w, h = batch_inputs['images_info']
+        # images = batch_inputs['images']
+        images = batch_inputs[0]
+        # h, w = batch_inputs['images_info']
+        h, w = batch_inputs[1]
+
+        c = 3
+        n = images.shape[0]
 
         images = [self.normalizer(img / 255) for img in images]
         images = torch.tensor(images)

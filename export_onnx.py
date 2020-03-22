@@ -21,7 +21,7 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-from configs.ct_coco_r50_config import config
+from configs.coco.ct_coco_r50_config import config
 from models.data import MetadataCatalog
 from models.centernet import build_model
 from models.train.checkpoint import DetectionCheckpointer
@@ -33,6 +33,8 @@ import sys
 import os
 from alfred.vis.image.det import visualize_det_cv2_part
 from alfred.vis.image.get_dataset_label_map import coco_label_map_list
+
+from alfred.dl.torch.common import device
 import glob
 
 
@@ -64,7 +66,7 @@ class ONNXExporter:
         # image = self.transform_gen.get_transform(original_image).apply_image(original_image)
         image = original_image
         # we will do preprocess inside model
-        image = torch.as_tensor(image.astype("float32").transpose(2, 0, 1))
+        image = torch.as_tensor(image.astype("float32").transpose(2, 0, 1)).to(device)
         # inputs = {"image": image, "height": height, "width": width}
         aligned_images = self.model.preprocess_onnx(image)
         # predictions = self.model([inputs])
@@ -72,9 +74,12 @@ class ONNXExporter:
         onnx_model_f = 'centernet_r50_coco.onnx'
         inp_dict = {
             "images": image,
-            "images_info":
+            "images_info": [height, width]
         }
-        torch.onnx.export(self.model, [aligned_images], onnx_model_f, verbose=True)
+        inp = (image, torch.tensor([height, width]).to(device))
+        print(inp)
+        # 2 inputs how to trace model?
+        torch.onnx.export(self.model, inp, onnx_model_f, verbose=True)
         print('onnx exported!')
         # return predictions
 
