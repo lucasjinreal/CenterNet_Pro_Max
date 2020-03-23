@@ -40,6 +40,8 @@ from .networks.head.centernet_head import CenternetHead
 from .backbone.backbone import Backbone
 from .backbone.resnet_backbone import ResnetBackbone
 
+from alfred.dl.torch.common import device
+
 
 def print_dict_shape(d, mark):
     for k, v in d.items():
@@ -104,7 +106,9 @@ class CenterNet(nn.Module):
                 assert isinstance(batched_inputs,
                                   dict), 'for ONNX mode, inputs should' \
                                                  ' dict contains images and images_info'
-                return self.inference_onnx(batched_inputs)
+                images = batched_inputs['images']
+                images_info = batched_inputs['images_info']
+                return self.inference_onnx(images, images_info)
             else:
                 images = self.preprocess_image(batched_inputs)
                 return self.inference(images)
@@ -204,7 +208,7 @@ class CenterNet(nn.Module):
         return [{"instances": det_instance}]
 
     @torch.no_grad()
-    def inference_onnx(self, batch_inputs):
+    def inference_onnx(self, images, images_info):
         """
         images(tensor): [N, 3, w, h]
         images_info:
@@ -213,15 +217,12 @@ class CenterNet(nn.Module):
         """
         logging.info('this is onnx mode for onnx export, do not enable when inference via python.')
         # images = batch_inputs['images']
-        images = batch_inputs[0]
         # h, w = batch_inputs['images_info']
-        h, w = batch_inputs[1]
+        h, w = images_info[0]
 
-        c = 3
+        # c = 3
         n = images.shape[0]
-
-        images = [self.normalizer(img / 255) for img in images]
-        images = torch.tensor(images)
+        assert isinstance(images, torch.Tensor), 'images must be Tensor.'
 
         # todo: make it to be it.
         # n, c, h, w = images.tensor.shape
@@ -235,16 +236,16 @@ class CenterNet(nn.Module):
                         width=new_w // down_scale)
 
         pad_value = [-x / y for x, y in zip(self.mean, self.std)]
-        aligned_img = torch.Tensor(pad_value).reshape((1, -1, 1, 1)).expand(n, c, new_h, new_w)
-        aligned_img = aligned_img.to(images.tensor.device)
+        aligned_img = torch.Tensor(pad_value).reshape((1, -1, 1, 1)).expand(n, 3, new_h, new_w).to(device)
+        # aligned_img = aligned_img.to(images.tensor.device)
 
         pad_w, pad_h = math.ceil((new_w - w) / 2), math.ceil((new_h - h) / 2)
-        aligned_img[..., pad_h:h + pad_h, pad_w:w + pad_w] = images.tensor
+        aligned_img[..., pad_h:h + pad_h, pad_w:w + pad_w] = images
 
         features = self.backbone(aligned_img)
         up_fmap = self.upsample(features)
         pred_dict = self.head(up_fmap)
-        results = self.decode_prediction(pred_dict, img_info)
+        results = self.decode_prediction_onnx(pred_dict, img_info)
         logging.info('decode predictions done.')
         print(results)
         # ori_w, ori_h = img_info['center'] * 2
@@ -298,6 +299,32 @@ class CenterNet(nn.Module):
         scores = scores[keep_idx]
         classes = classes[keep_idx]
         boxes = boxes[:, keep_idx, :]
+        # dets = CenterNetDecoder.decode(fmap, wh, reg)
+        boxes = CenterNetDecoder.transform_boxes(boxes, img_info)
+        boxes = Boxes(boxes)
+        return dict(pred_boxes=boxes, scores=scores, pred_classes=classes)
+
+    @staticmethod
+    def decode_prediction_onnx(pred_dict, img_info):
+        """
+        Args:
+            pred_dict(dict): a dict contains all information of prediction
+            img_info(dict): a dict contains needed information of origin image
+        """
+        fmap = pred_dict["cls"]
+        reg = pred_dict["reg"]
+        wh = pred_dict["wh"]
+
+        boxes, scores, classes = CenterNetDecoder.decode(fmap, wh, reg)
+        # boxes = Boxes(boxes.reshape(boxes.shape[-2:]))
+        scores = scores.reshape(-1)
+        classes = classes.reshape(-1).to(torch.int64)
+
+        # only keep score bigger than 0.1
+        # keep_idx = torch.nonzero(scores > 0.1).reshape(-1)
+        # scores = scores[keep_idx]
+        # classes = classes[keep_idx]
+        # boxes = boxes[:, keep_idx, :]
         # dets = CenterNetDecoder.decode(fmap, wh, reg)
         boxes = CenterNetDecoder.transform_boxes(boxes, img_info)
         boxes = Boxes(boxes)
