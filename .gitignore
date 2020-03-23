@@ -48,3 +48,4 @@ env/
 weights/
 
 train_coco_tl_r50.py
+.vscode/
