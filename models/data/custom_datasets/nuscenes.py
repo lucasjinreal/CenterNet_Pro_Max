@@ -10,6 +10,10 @@ from nuscenes.utils.geometry_utils import BoxVisibility
 from ..catalog import DatasetCatalog, MetadataCatalog
 from models.structures.boxes import BoxMode
 
+import os
+from alfred.utils.log import logger as logging
+import pickle
+
 
 def get_nuscenes_dicts(path="./", version='v1.0-mini', categories=None):
     """
@@ -47,8 +51,11 @@ def get_nuscenes_dicts(path="./", version='v1.0-mini', categories=None):
              'static_object.bicycle_rack']
     :return: <dict>. Return dict with data annotation in detectron2 format.
     """
-    assert(path[-1] == "/"), "Insert '/' in the end of path"
+    logging.info('your nuscenes root: {}'.format(path))
+    # assert(path[-1] == "/"), "Insert '/' in the end of path"
+    path = os.path.abspath(path) + '/'
     nusc = NuScenes(version=version, dataroot=path, verbose=False)
+    logging.info('nuScenes object loaded done.')
 
     # Select all catecategories if not set
     if categories == None:
@@ -56,7 +63,13 @@ def get_nuscenes_dicts(path="./", version='v1.0-mini', categories=None):
     assert(isinstance(categories, list)), "Categories type must be list"
 
     dataset_dicts = []
+    cache_f = os.path.join(path, 'ct_nuscenes.cache')
+    if os.path.exists(cache_f):
+        dataset_dicts = pickle.load(open(cache_f, 'rb'))
+        logging.info('resumed nuscenes cache file: {}'.format(cache_f))
+        return dataset_dicts
     idx = 0
+    logging.info('start parsing nuscenes data to train dict format...')
     for i in tqdm(range(0, len(nusc.scene))):
         scene = nusc.scene[i]
         scene_rec = nusc.get('scene', scene['token'])
@@ -64,43 +77,56 @@ def get_nuscenes_dicts(path="./", version='v1.0-mini', categories=None):
 
         # Go through all frame in current scene
         while True:
+            # we maybe add CAM_LEFT as well
             data = nusc.get('sample_data', sample_rec_cur['data']["CAM_FRONT"])
 
             record = {}
             record["file_name"] = path + data["filename"]
-            record["image_id"] = idx
-            record["height"] = data["height"]
-            record["width"] = data["width"]
-            idx += 1
+            if os.path.exists(record['file_name']):
+                record["image_id"] = idx
+                record["height"] = data["height"]
+                record["width"] = data["width"]
+                idx += 1
 
-            # Get boxes from front camera
-            _, boxes, camera_intrinsic = nusc.get_sample_data(
-                sample_rec_cur['data']["CAM_FRONT"], BoxVisibility.ANY)
-            # Get only necessary boxes
-            boxes = [box for box in boxes if box.name in categories]
-            # Go through all bounding boxes
-            objs = []
-            for box in boxes:
-                corners = view_points(
-                    box.corners(), camera_intrinsic, normalize=True)[:2, :]
-                max_x = int(max(corners[:][0]))
-                min_x = int(min(corners[:][0]))
-                max_y = int(max(corners[:][1]))
-                min_y = int(min(corners[:][1]))
-                obj = {
-                    "bbox": [min_x, min_y, max_x, max_y],
-                    "bbox_mode": BoxMode.XYXY_ABS,
-                    "category_id": categories.index(box.name),
-                    "iscrowd": 0
-                }
-                objs.append(obj)
+                # Get boxes from front camera
+                _, boxes, camera_intrinsic = nusc.get_sample_data(
+                    sample_rec_cur['data']["CAM_FRONT"], BoxVisibility.ANY)
+                # Get only necessary boxes
+                boxes = [box for box in boxes if box.name in categories]
+                # Go through all bounding boxes
+                objs = []
+                for box in boxes:
+                    corners = view_points(
+                        box.corners(), camera_intrinsic, normalize=True)[:2, :]
+                    max_x = int(max(corners[:][0]))
+                    min_x = int(min(corners[:][0]))
+                    max_y = int(max(corners[:][1]))
+                    min_y = int(min(corners[:][1]))
+                    obj = {
+                        "bbox": [min_x, min_y, max_x, max_y],
+                        "bbox_mode": BoxMode.XYXY_ABS,
+                        "category_id": categories.index(box.name),
+                        "iscrowd": 0
+                    }
+                    objs.append(obj)
 
-            record["annotations"] = objs
-            dataset_dicts.append(record)
+                record["annotations"] = objs
+                dataset_dicts.append(record)
 
-            # Get next frame
-            sample_rec_cur = nusc.get('sample', sample_rec_cur['next'])
-            # End of scene condition
-            if (sample_rec_cur["next"] == ""):
-                break
+                # Get next frame
+                sample_rec_cur = nusc.get('sample', sample_rec_cur['next'])
+                # End of scene condition
+                if (sample_rec_cur["next"] == ""):
+                    break
+            else:
+                logging.info('pass record: {} since image not found!'.format(record['file_name']))
+                sample_rec_cur = nusc.get('sample', sample_rec_cur['next'])
+                if (sample_rec_cur["next"] == ""):
+                    break
+                continue
+    logging.info('data convert done! all samples: {}'.format(len(dataset_dicts)))
+    if not os.path.exists(cache_f):
+        os.makedirs(os.path.dirname(cache_f), exist_ok=True)
+        pickle.dump(dataset_dicts, open(cache_f, 'wb'))
+        logging.info('nuscenes cache saved into: {}'.format(cache_f))
     return dataset_dicts

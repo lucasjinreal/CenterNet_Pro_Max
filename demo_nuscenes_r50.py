@@ -21,11 +21,13 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-from configs.coco.ct_coco_r50_config import config
+from configs.nuscenes.ct_r50_config import config
 from models.data import MetadataCatalog
 from models.centernet import build_model
 from models.train.checkpoint import DetectionCheckpointer
 from models.data import transforms as T
+from models.data import MetadataCatalog, DatasetCatalog
+
 import torch
 from PIL import Image
 import cv2
@@ -34,6 +36,30 @@ import os
 from alfred.vis.image.det import visualize_det_cv2_part
 from alfred.vis.image.get_dataset_label_map import coco_label_map_list
 import glob
+from models.data.custom_datasets.nuscenes import get_nuscenes_dicts
+
+
+categories = ['human.pedestrian.adult',
+              'human.pedestrian.child',
+              'human.pedestrian.wheelchair',
+              'human.pedestrian.stroller',
+              'human.pedestrian.personal_mobility',
+              'human.pedestrian.police_officer',
+              'human.pedestrian.construction_worker',
+              'vehicle.car',
+              'vehicle.bus.bendy',
+              'vehicle.bus.rigid',
+              'vehicle.truck',
+              'vehicle.construction',
+              'vehicle.emergency.ambulance',
+              'vehicle.emergency.police',
+              'vehicle.trailer']
+
+
+path = "datasets/nuScenes"
+get_dicts = lambda p=path, c=categories: get_nuscenes_dicts(path=p, version='v1.0-trainval', categories=c)
+DatasetCatalog.register("nusc_v1.0_trainval01", get_dicts)
+MetadataCatalog.get("nusc_v1.0_trainval01").thing_classes = categories
 
 
 class DefaultPredictor:
@@ -71,11 +97,10 @@ class DefaultPredictor:
 
 
 if __name__ == '__main__':
-    config.MODEL.WEIGHTS = './checkpoints/model_0609999.pth'
-    # config.MODEL.WEIGHTS = 'weights/centernet_r50_coco.pth'
+    config.MODEL.WEIGHTS = 'weights/ct_r50_coco_model_0609999.pth'
     # config.MODEL.WEIGHTS = 'checkpoints/resnet50_centernet.pth'
     predictor = DefaultPredictor(config)
-    coco_label_map_list = coco_label_map_list[1:]
+    coco_label_map_list = categories
 
     if len(sys.argv) > 1:
         data_f = sys.argv[1]

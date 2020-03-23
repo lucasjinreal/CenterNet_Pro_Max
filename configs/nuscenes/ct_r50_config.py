@@ -43,7 +43,7 @@ _config_dict = dict(
             HEAD_CONV=64,
             DECONV_CHANNEL=[2048, 256, 128, 64],
             DECONV_KERNEL=[4, 4, 4],
-            NUM_CLASSES=80,
+            NUM_CLASSES=15,
             MODULATE_DEFORM=True,
             BIAS_VALUE=-2.19,
             DOWN_SCALE=4,
@@ -83,7 +83,7 @@ _config_dict = dict(
     ),
     DATASETS=dict(
         TRAIN=("nusc_v1.0_trainval01",),
-        # TEST=("coco_2017_val",),
+        TEST=("nusc_v1.0_trainval01",),
     ),
     SOLVER=dict(
         # this lr work on 1 gpu, try SGD as well

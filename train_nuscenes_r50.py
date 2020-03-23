@@ -59,8 +59,8 @@ categories = ['human.pedestrian.adult',
               'vehicle.trailer']
 
 
-path = "datasets/nuScenes/v1.0-trainval01"
-get_dicts = lambda p=path, c=categories: get_nuscenes_dicts(path=p, categories=c)
+path = "datasets/nuScenes"
+get_dicts = lambda p=path, c=categories: get_nuscenes_dicts(path=p, version='v1.0-trainval', categories=c)
 DatasetCatalog.register("nusc_v1.0_trainval01", get_dicts)
 MetadataCatalog.get("nusc_v1.0_trainval01").thing_classes = categories
 
