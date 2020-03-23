@@ -79,7 +79,7 @@ class ONNXExporter:
         inp = (image, torch.tensor([height, width]).to(device))
         print(inp)
         # 2 inputs how to trace model?
-        torch.onnx.export(self.model, inp, onnx_model_f, verbose=True)
+        torch.onnx.export(self.model, inp_dict, onnx_model_f, verbose=True)
         print('onnx exported!')
         # return predictions
 
