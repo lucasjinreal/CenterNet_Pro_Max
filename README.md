@@ -25,7 +25,16 @@ This version build upon Centernet-Better, but unlike original repo, we provide s
 
 - *2050.01.01*: more news to come;
 
-- *2020.03.23*: We have supported ONNX exported! Now this exported onnx is an experiments support since we merged all post process into onnx, so that there may be some unsupported op but other frameworks. here is current onnx model ops:
+- *2020.03.24*: Training on **any coco like dataset**:
+
+  ```
+  register_coco_instances('coco_tl', {}, './datasets/coco_tl/annotations/instances_train2017.json', './datasets/coco_tl/images')
+  MetadataCatalog.get("coco_tl").thing_classes = categories
+  ```
+
+  Using 2 line of codes, you can train your custom dataset freely! More example see our `train_tl.py`.
+
+- *2020.03.23*: We have supported ONNX export! Now this exported onnx is an experimental support since we merged all post process into onnx, there may be some unsupported op in other frameworks. here is current onnx model ops:
 
   ```
   > onnxexp centernet_r50_coco.onnx summary
@@ -42,7 +51,7 @@ This version build upon Centernet-Better, but unlike original repo, we provide s
   -------------------------------------------
   ```
 
-  Be note that, Nonzero not supported by onnx2trt, we will polish onnx model and finally make it as simple as possible!
+  Be note that, Nonzero not supported by onnx2trt, we will polish onnx model make it simply enough to deploy!
 
   Also, we have support a custom dataset training which is nuScenes! Checkout our codes to try yourself!
 

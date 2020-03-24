@@ -54,8 +54,6 @@ categories = ["trafficlight_red",
               "trafficlight_black",
               "trafficlight_yellow", ]
 
-
-path = "datasets/tl"
 register_coco_instances('coco_tl', {}, './datasets/coco_tl/annotations/instances_train2017.json', './datasets/coco_tl/images')
 MetadataCatalog.get("coco_tl").thing_classes = categories
 
