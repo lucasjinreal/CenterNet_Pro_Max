@@ -23,7 +23,7 @@
 #
 import os
 import torch
-from configs.nuscenes.ct_r50_config import config
+from configs.tl.ct_tl_r50_config import config
 from typing import Any, Dict, List
 import argparse
 from models.train.trainer import DefaultTrainer
@@ -39,7 +39,7 @@ from alfred.utils.log import logger
 from alfred.utils.log import logger as logging
 import importlib
 
-from models.data.custom_datasets.nuscenes import get_nuscenes_dicts
+from models.data.datasets import register_coco_instances
 
 
 """
@@ -49,27 +49,15 @@ green, red, yellow, black
 """
 
 
-categories = ['human.pedestrian.adult',
-              'human.pedestrian.child',
-              'human.pedestrian.wheelchair',
-              'human.pedestrian.stroller',
-              'human.pedestrian.personal_mobility',
-              'human.pedestrian.police_officer',
-              'human.pedestrian.construction_worker',
-              'vehicle.car',
-              'vehicle.bus.bendy',
-              'vehicle.bus.rigid',
-              'vehicle.truck',
-              'vehicle.construction',
-              'vehicle.emergency.ambulance',
-              'vehicle.emergency.police',
-              'vehicle.trailer']
+categories = ["trafficlight_red",
+              "trafficlight_green",
+              "trafficlight_black",
+              "trafficlight_yellow", ]
 
 
-path = "datasets/nuScenes"
-get_dicts = lambda p=path, c=categories: get_nuscenes_dicts(path=p, version='v1.0-trainval', categories=c)
-DatasetCatalog.register("nusc_v1.0_trainval01", get_dicts)
-MetadataCatalog.get("nusc_v1.0_trainval01").thing_classes = categories
+path = "datasets/tl"
+register_coco_instances('coco_tl', {}, './datasets/coco_tl/annotations/instances_train2017.json', './datasets/coco_tl/images')
+MetadataCatalog.get("coco_tl").thing_classes = categories
 
 
 class Trainer(DefaultTrainer):
@@ -111,7 +99,8 @@ def train(args):
     trainer.resume_or_load(resume=args.resume)
     if cfg.TEST.AUG.ENABLED:
         trainer.register_hooks(
-            [hooks.EvalHook(0, lambda: trainer.test_with_TTA(cfg, trainer.model))]
+            [hooks.EvalHook(
+                0, lambda: trainer.test_with_TTA(cfg, trainer.model))]
         )
     return trainer.train()
 
@@ -123,13 +112,16 @@ def default_argument_parser():
         action="store_true",
         help="whether to attempt to resume from the checkpoint directory",
     )
-    parser.add_argument("--eval-only", action="store_true", help="perform evaluation only")
-    parser.add_argument("--num-gpus", type=int, default=1, help="number of gpus *per machine*")
+    parser.add_argument("--eval-only", action="store_true",
+                        help="perform evaluation only")
+    parser.add_argument("--num-gpus", type=int, default=1,
+                        help="number of gpus *per machine*")
     parser.add_argument("--num-machines", type=int, default=1)
     parser.add_argument(
         "--machine-rank", type=int, default=0, help="the rank of this machine (unique per machine)"
     )
-    parser.add_argument("--dist-url", default="tcp://127.0.0.1:{}".format('9080'))
+    parser.add_argument(
+        "--dist-url", default="tcp://127.0.0.1:{}".format('9080'))
     parser.add_argument(
         "opts",
         help="Modify config options using the command-line",

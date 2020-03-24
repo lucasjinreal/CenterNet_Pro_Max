@@ -34,6 +34,11 @@ from models.configs.base_detection_config import config, BaseDetectionConfig
 import os.path as osp
 
 
+"""
+4 classes on trafficlight
+
+"""
+
 _config_dict = dict(
     MODEL=dict(
         # WEIGHTS="detectron2://ImageNetPretrained/MSRA/R-18.pth",
@@ -47,7 +52,7 @@ _config_dict = dict(
             HEAD_CONV=64,
             DECONV_CHANNEL=[2048, 256, 128, 64],
             DECONV_KERNEL=[4, 4, 4],
-            NUM_CLASSES=80,
+            NUM_CLASSES=4,
             MODULATE_DEFORM=True,
             BIAS_VALUE=-2.19,
             DOWN_SCALE=4,
@@ -86,8 +91,8 @@ _config_dict = dict(
         NUM_WORKERS=0,
     ),
     DATASETS=dict(
-        TRAIN=("coco_2017_train",),
-        TEST=("coco_2017_val",),
+        TRAIN=("coco_tl",),
+        # TEST=("coco_2017_val",),
     ),
     SOLVER=dict(
         # this lr work on 1 gpu, try SGD as well
