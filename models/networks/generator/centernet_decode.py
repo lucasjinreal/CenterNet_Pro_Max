@@ -40,6 +40,9 @@ class CenterNetDecoder(object):
         r"""
         decode output feature map to detection results
 
+        this part should write more generic for better onnx support.
+        currently OneHot will involed but that not good support
+
         Args:
             fmap(Tensor): output feature map
             wh(Tensor): tensor that represents predicted width-height
@@ -123,7 +126,6 @@ class CenterNetDecoder(object):
         """
         # batch, channel, height, width = scores.shape
         sh = torch.tensor(scores.shape).to(device)
-        print(sh)
         batch = sh[0]
         channel = sh[1]
         height = sh[2]
@@ -132,10 +134,6 @@ class CenterNetDecoder(object):
         # get topk score and its index in every H x W(channel dim) feature map
         topk_scores, topk_inds = torch.topk(
             scores.reshape(batch, channel, -1), K)
-        print(topk_inds)
-        print(height)
-        print(width)
-        print(height*width)
         # print((height*width).to(device))
         topk_inds = topk_inds % (height * width)
         topk_ys = (topk_inds / width).int().float()

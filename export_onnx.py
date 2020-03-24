@@ -67,23 +67,16 @@ class ONNXExporter:
         # image = self.transform_gen.get_transform(original_image).apply_image(original_image)
         image = np.array(original_image, dtype=np.float32)
         inputs = {"image": torch.tensor(image).permute(2, 0, 1), "height": height, "width": width}
-
-        # we will do preprocess inside model
-        image -= self.cfg.MODEL.PIXEL_MEAN
-        image /= self.cfg.MODEL.PIXEL_STD
-        image /= 255.
-        image = torch.as_tensor(image.astype("float32").transpose(2, 0, 1)).to(device).unsqueeze(0)
         predictions = self.model([inputs])
 
         print('try exporting onnx model...')
         self.cfg.MODEL.ONNX = True
         onnx_model_f = 'centernet_r50_coco.onnx'
+        images = torch.tensor(image).permute((2, 0, 1)).to(device)
+        aligned_img, _ = self.model.preprocess_onnx(images, torch.tensor([[height, width]], dtype=torch.int64))
         inp_dict = {
-            "images": image,
-            "images_info": torch.tensor([[height, width]], dtype=torch.int64)
+            'aligned_img': aligned_img,
         }
-        inp = (image, torch.tensor([height, width]).to(device))
-        print(inp_dict)
         # 2 inputs how to trace model?
         torch.onnx.export(self.model, inp_dict, onnx_model_f, verbose=True)
         print('onnx exported!')
