@@ -66,15 +66,17 @@ class ONNXExporter:
         height, width = original_image.shape[:2]
         # image = self.transform_gen.get_transform(original_image).apply_image(original_image)
         image = np.array(original_image, dtype=np.float32)
+        inputs = {"image": torch.tensor(image).permute(2, 0, 1), "height": height, "width": width}
+
         # we will do preprocess inside model
         image -= self.cfg.MODEL.PIXEL_MEAN
         image /= self.cfg.MODEL.PIXEL_STD
         image /= 255.
         image = torch.as_tensor(image.astype("float32").transpose(2, 0, 1)).to(device).unsqueeze(0)
-        # inputs = {"image": image, "height": height, "width": width}
-        aligned_images = self.model.preprocess_onnx(image)
-        # predictions = self.model([inputs])
+        predictions = self.model([inputs])
+
         print('try exporting onnx model...')
+        self.cfg.MODEL.ONNX = True
         onnx_model_f = 'centernet_r50_coco.onnx'
         inp_dict = {
             "images": image,
@@ -85,13 +87,12 @@ class ONNXExporter:
         # 2 inputs how to trace model?
         torch.onnx.export(self.model, inp_dict, onnx_model_f, verbose=True)
         print('onnx exported!')
-        # return predictions
+        return predictions[0]
 
 
 if __name__ == '__main__':
     # config.MODEL.WEIGHTS = 'weights/model_0329999.pth'
     config.MODEL.WEIGHTS = 'checkpoints/ctdet_r50_coco_399999.pth'
-    config.MODEL.ONNX = True
     # config.MODEL.WEIGHTS = 'checkpoints/resnet50_centernet.pth'
     predictor = ONNXExporter(config)
     coco_label_map_list = coco_label_map_list[1:]

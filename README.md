@@ -11,7 +11,7 @@ This version build upon Centernet-Better, but unlike original repo, we provide s
 - [x] **We provide demo scripts to detect and visualize**;
 - [x] We ported DCN from mmdetection with latest updates (this part is not like centernet-better);
 - [x] We provide single GPU training settings (for some smaller datasets 1 GPU is enough, also you can using 8 GPUs as well);
-- [ ] **We will provide onnx export**.
+- [x] **We will provide onnx export**.
 - [ ] We will provide onnx export and TensorRT inference;
 - [ ] More backbones such as Vovnets;
 - [ ] **More heads such as 3D and mask and CenterFace**;
@@ -25,7 +25,28 @@ This version build upon Centernet-Better, but unlike original repo, we provide s
 
 - *2050.01.01*: more news to come;
 
-- *2050.03.21*: Thanks for issue: [#3](https://github.com/jinfagang/CenterNet_Pro_Max/issues/3) pointed out, gaussian radius calculate method has been updated. What's gaussian radius? From my perspective, we want keep all alternative boxes that top left and right bottom point with some range, this picture can explain this:
+- *2020.03.23*: We have supported ONNX exported! Now this exported onnx is an experiments support since we merged all post process into onnx, so that there may be some unsupported op but other frameworks. here is current onnx model ops:
+
+  ```
+  > onnxexp centernet_r50_coco.onnx summary
+  Exploring on onnx model: centernet_r50_coco.onnx
+  ONNX model sum on: centernet_r50_coco.onnx
+  
+  
+  -------------------------------------------
+  ir version: 6
+  opset_import: 9 
+  producer_name: pytorch
+  doc_string: 
+  all ops used: Constant,Gather,Shape,Cast,Or,Add,Unsqueeze,Concat,Reshape,ConstantOfShape,Mul,Equal,Where,Expand,NonZero,Transpose,Squeeze,Slice,ATen,Conv,BatchNormalization,Relu,MaxPool,ConvTranspose,Sigmoid,TopK,Flatten,Div
+  -------------------------------------------
+  ```
+
+  Be note that, Nonzero not supported by onnx2trt, we will polish onnx model and finally make it as simple as possible!
+
+  Also, we have support a custom dataset training which is nuScenes! Checkout our codes to try yourself!
+
+- *2020.03.21*: Thanks for issue: [#3](https://github.com/jinfagang/CenterNet_Pro_Max/issues/3) pointed out, gaussian radius calculate method has been updated. What's gaussian radius? From my perspective, we want keep all alternative boxes that top left and right bottom point with some range, this picture can explain this:
 
   ![](https://pic3.zhimg.com/80/v2-2c6dcd69318e8650eddab6a4c82407ba_720w.jpg)
 
