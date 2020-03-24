@@ -15,6 +15,16 @@ from alfred.utils.log import logger as logging
 import pickle
 
 
+'''
+if your dataset not coco format,
+try convert it into detectron2 standard format first
+the register it by adding all these dict
+
+we have nuscenes for example
+
+'''
+
+
 def get_nuscenes_dicts(path="./", version='v1.0-mini', categories=None):
     """
     This is a helper fuction that create dicts from nuscenes to detectron2 format.

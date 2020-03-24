@@ -97,7 +97,7 @@ class DefaultPredictor:
 
 
 if __name__ == '__main__':
-    config.MODEL.WEIGHTS = 'weights/ct_r50_coco_model_0609999.pth'
+    config.MODEL.WEIGHTS = 'checkpoints/model_0059999.pth'
     # config.MODEL.WEIGHTS = 'checkpoints/resnet50_centernet.pth'
     predictor = DefaultPredictor(config)
     coco_label_map_list = categories
