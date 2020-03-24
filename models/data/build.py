@@ -51,6 +51,7 @@ This file contains the default logic to build a dataloader for training or testi
 __all__ = [
     "build_detection_train_loader",
     "build_detection_test_loader",
+    "build_centerface_train_loader",
     "get_detection_dataset_dicts",
     "load_proposals_into_dataset",
     "print_instances_class_histogram",
@@ -309,6 +310,50 @@ def get_detection_dataset_dicts(
     return dataset_dicts
 
 
+def get_centerface_dataset_dicts(
+    dataset_names, filter_empty=True, min_keypoints=0, proposal_files=None
+):
+    """
+    Get centerface used dataset dicts, first using STANDARD format
+    dataset dict, convert it into proposals, add landmarks for training.
+
+    TODO:
+
+    """
+    assert len(dataset_names)
+    dataset_dicts = [DatasetCatalog.get(dataset_name) for dataset_name in dataset_names]
+
+    for dataset_name, dicts in zip(dataset_names, dataset_dicts):
+        assert len(dicts), "Dataset '{}' is empty!".format(dataset_name)
+
+    if proposal_files is not None:
+        assert len(dataset_names) == len(proposal_files)
+        # load precomputed proposals from proposal files
+        dataset_dicts = [
+            load_proposals_into_dataset(dataset_i_dicts, proposal_file)
+            for dataset_i_dicts, proposal_file in zip(dataset_dicts, proposal_files)
+        ]
+
+    dataset_dicts = list(itertools.chain.from_iterable(dataset_dicts))
+
+    has_instances = "annotations" in dataset_dicts[0]
+    # Keep images without instance-level GT if the dataset has semantic labels.
+    if filter_empty and has_instances and "sem_seg_file_name" not in dataset_dicts[0]:
+        dataset_dicts = filter_images_with_only_crowd_annotations(dataset_dicts)
+
+    if min_keypoints > 0 and has_instances:
+        dataset_dicts = filter_images_with_few_keypoints(dataset_dicts, min_keypoints)
+
+    if has_instances:
+        try:
+            class_names = MetadataCatalog.get(dataset_names[0]).thing_classes
+            check_metadata_consistency("thing_classes", dataset_names)
+            print_instances_class_histogram(dataset_dicts, class_names)
+        except AttributeError:  # class names are not available for this dataset
+            pass
+    return dataset_dicts
+
+
 def build_detection_train_loader(cfg, mapper=None):
     r"""
     A data loader is created by the following steps:
@@ -430,6 +475,70 @@ def build_detection_test_loader(cfg, dataset_name, mapper=None):
     )
     return data_loader
 
+
+"""
+Write some custom dataset loader here
+such as box with landmark for CenterFace training
+
+"""
+
+
+def build_centerface_train_loader(cfg, mapper=None):
+    num_workers = get_world_size()
+    images_per_batch = cfg.SOLVER.IMS_PER_BATCH
+    assert (
+        images_per_batch % num_workers == 0
+    ), "SOLVER.IMS_PER_BATCH ({}) must be divisible by the number of workers ({}).".format(
+        images_per_batch, num_workers
+    )
+    assert (
+        images_per_batch >= num_workers
+    ), "SOLVER.IMS_PER_BATCH ({}) must be larger than the number of workers ({}).".format(
+        images_per_batch, num_workers
+    )
+    images_per_worker = images_per_batch // num_workers
+
+    dataset_dicts = get_detection_dataset_dicts(
+        cfg.DATASETS.TRAIN,
+        filter_empty=cfg.DATALOADER.FILTER_EMPTY_ANNOTATIONS,
+        min_keypoints=cfg.MODEL.ROI_KEYPOINT_HEAD.MIN_KEYPOINTS_PER_IMAGE
+        if cfg.MODEL.KEYPOINT_ON
+        else 0,
+        proposal_files=cfg.DATASETS.PROPOSAL_FILES_TRAIN if cfg.MODEL.LOAD_PROPOSALS else None,
+    )
+    dataset = DatasetFromList(dataset_dicts, copy=False)
+
+    # Bin edges for batching images with similar aspect ratios. If ASPECT_RATIO_GROUPING
+    # is enabled, we define two bins with an edge at height / width = 1.
+    group_bin_edges = [1] if cfg.DATALOADER.ASPECT_RATIO_GROUPING else []
+    aspect_ratios = [float(img["height"]) / float(img["width"]) for img in dataset]
+
+    if mapper is None:
+        mapper = DatasetMapper(cfg, True)
+    dataset = MapDataset(dataset, mapper)
+
+    sampler_name = cfg.DATALOADER.SAMPLER_TRAIN
+    logger.info("Using training sampler {}".format(sampler_name))
+    if sampler_name == "TrainingSampler":
+        sampler = samplers.TrainingSampler(len(dataset))
+    elif sampler_name == "RepeatFactorTrainingSampler":
+        sampler = samplers.RepeatFactorTrainingSampler(
+            dataset_dicts, cfg.DATALOADER.REPEAT_THRESHOLD
+        )
+    else:
+        raise ValueError("Unknown training sampler: {}".format(sampler_name))
+    batch_sampler = build_batch_data_sampler(
+        sampler, images_per_worker, group_bin_edges, aspect_ratios
+    )
+
+    data_loader = torch.utils.data.DataLoader(
+        dataset,
+        num_workers=cfg.DATALOADER.NUM_WORKERS,
+        batch_sampler=batch_sampler,
+        collate_fn=trivial_batch_collator,
+        worker_init_fn=worker_init_reset_seed,
+    )
+    return data_loader
 
 def trivial_batch_collator(batch):
     """
