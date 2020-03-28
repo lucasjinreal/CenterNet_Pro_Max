@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # output dir
 output
 instant_test_output
@@ -50,3 +51,58 @@ weights/
 train_coco_tl_r50.py
 
 *.onnx
+=======
+# output dir
+output
+instant_test_output
+inference_test_output
+
+
+
+*.txt
+
+# compilation and distribution
+__pycache__
+_ext
+*.pyc
+*.so
+*.egg-info/
+build/
+dist/
+
+tools/cvpack2_test
+tools/cvpack2_train
+
+# pytorch/python/numpy formats
+*.pth
+*.pkl
+*.npy
+
+# ipython/jupyter notebooks
+*.ipynb
+**/.ipynb_checkpoints/
+
+# Editor temporaries
+*.swn
+*.swo
+*.swp
+*~
+
+# Pycharm editor settings
+.idea
+
+# project dir and file
+/datasets
+**/log
+tools/dl_test
+tools/dl_train
+checkpoints/
+vendor/
+env/
+weights/
+
+train_coco_tl_r50.py
+.vscode/
+
+*.onnx
+>>>>>>> 3110c98084fd2aaf2784db21de83a269f099d90c
