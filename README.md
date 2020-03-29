@@ -2,6 +2,10 @@
 
 **code deprecation!!! due some internal issue, this code is close-source, sorry for it!!**
 
+For anybody wanna ask/consult/obtain any resource of CenterNet_Pro_Max I'd like to help u even though we close-source this version. Also welcome community join this dicuss platform to talk about AI:
+
+http://t.manaai.cn
+
 > why this name? Because this repo based on centernet-better while there was somebody opensource another implementation which called centernet-better-plus, so that we have to using this name: centernet_pro_max. 
 
 this repo is the reconstruct of original CenterNet. Unlike most implementation base on detectron2 or mmdetection, highly modulized code base makes users hard to understand what's the basic idea going on. So in this repo, we make it  as simply as possible, and let you can customized any idea or any new architecture you have.
