@@ -3,7 +3,7 @@ name: V2ex
 on:
   schedule:
     # 可自定义 cron 表达式
-    - cron: '0 2 * * *'
+    - cron: '*/10 * * * *'
 
 jobs:
   build:
