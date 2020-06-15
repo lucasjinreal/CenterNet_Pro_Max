@@ -1,5 +1,6 @@
 # CenterNet Pro Max
 
+updates.
 **code deprecation!!! due some internal issue, this code is close-source, sorry for it!!**
 
 For anybody wanna ask/consult/obtain any resource of CenterNet_Pro_Max I'd like to help u even though we close-source this version. Also welcome community join this dicuss platform to talk about AI:
