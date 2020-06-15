@@ -1,0 +1,16 @@
+name: V2ex
+
+on:
+  schedule:
+    # 可自定义 cron 表达式
+    - cron: '0 2 * * *'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: yanglbme/v2ex-action@master
+        with:
+          webhook: ${{ secrets.WEBHOOK }}
+          secret: ${{ secrets.SECRET }}
+          count: 6
